@@ -1,0 +1,39 @@
+{
+  "name": "vcd",
+  "version": "0.1.0",
+  "description": "Value Change Dump (VCD) parser",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "eslint bin && nyc --reporter=lcov mocha",
+    "install": "node bin/build.js && node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wavedrom/vcd.git"
+  },
+  "keywords": [
+    "VCD"
+  ],
+  "author": "Aliaksei Chapyzhenka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wavedrom/vcd/issues"
+  },
+  "homepage": "https://github.com/wavedrom/vcd#readme",
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "llparse": "^6.1.1"
+  },
+  "devDependencies": {
+    "@drom/eslint-config": "^0.10.0",
+    "chai": "^4.2.0",
+    "eslint": "^5.16.0",
+    "llparse-dot": "^1.0.1",
+    "llparse-test-fixture": "^3.3.1",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.1"
+  },
+  "eslintConfig": {
+    "extends": "@drom/eslint-config/eslint4/node8"
+  }
+}

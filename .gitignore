@@ -1,0 +1,6 @@
+.nyc_output
+build
+coverage
+node_modules
+package-lock.json
+vcd_parser.*
