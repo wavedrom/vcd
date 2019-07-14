@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "vcd_parser",
+      "target_name": "vcd",
       "sources": [
         "vcd_parser.c",
         "vcd.c"

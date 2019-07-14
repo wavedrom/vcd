@@ -22,7 +22,7 @@
   "homepage": "https://github.com/wavedrom/vcd#readme",
   "dependencies": {
     "bindings": "^1.5.0",
-    "llparse": "^6.1.1"
+    "llparse": "^6.2.0"
   },
   "devDependencies": {
     "@drom/eslint-config": "^0.10.0",
