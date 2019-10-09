@@ -4,7 +4,7 @@
   "description": "Value Change Dump (VCD) parser",
   "main": "lib/index.js",
   "scripts": {
-    "test": "eslint bin && nyc --reporter=lcov mocha",
+    "test": "eslint bin && nyc -r=text -r=lcov mocha",
     "install": "node bin/build.js && node-gyp rebuild"
   },
   "repository": {
@@ -30,7 +30,7 @@
     "eslint": "^5.16.0",
     "llparse-dot": "^1.0.1",
     "llparse-test-fixture": "^3.3.1",
-    "mocha": "^6.1.4",
+    "mocha": "^6.2.1",
     "nyc": "^14.1.1"
   },
   "eslintConfig": {
