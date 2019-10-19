@@ -6,57 +6,48 @@ const llparse = require('llparse');
 const llparseDot = require('llparse-dot');
 
 const prj = 'vcd_parser';
-
 const p = new llparse.LLParse(prj);
 
+// Add custom uint8_t property to the state
+p.property('i8', 'command');
+
 const declaration = p.node('declaration');
+const commandSpan = p.span(p.code.span('commandSpan'));
 const inDeclaration = p.node('inDeclaration');
 const enddefinitions = p.node('inDeclarationEnd');
 const simulation = p.node('simulation');
 const inSimulation = p.node('inSimulation');
 
-// Add custom uint8_t property to the state
-p.property('i8', 'declaration');
-p.property('i8', 'simulation');
-
-// Store method inside a custom property
-const onDeclaration = p.invoke(p.code.store('declaration'), inDeclaration);
-const onSimulation = p.invoke(p.code.store('simulation'), inSimulation);
-
 declaration
+  .match([' ', '\n', '\t'], declaration)
   .select({
-    '$comment': 0,
-    '$date': 1,
-    '$scope': 2,
-    '$timescale': 3,
-    '$upscope': 4,
-    '$var': 5,
-    '$version': 6
-  }, onDeclaration)
-  .match('$enddefinitions', enddefinitions)
-  .otherwise(p.error(1, 'Expected declaration'));
+    '$comment': 1, '$date': 2, '$scope': 3, '$timescale': 4,
+    '$upscope': 5, '$var': 6, '$version': 7
+  }, p.invoke(p.code.store('command'), commandSpan.start(inDeclaration)))
+  .select({
+    '$enddefinitions': 100
+  }, p.invoke(p.code.store('command'), commandSpan.start(enddefinitions)))
+  .otherwise(p.error(1, 'Expected declaration command'));
 
 inDeclaration
-  .match('$end', declaration)
-  .otherwise(p.error(2, 'Expected end of declaration'));
+  .match('$end', commandSpan.end(declaration))
+  .skipTo(inDeclaration);
 
 enddefinitions
-  .match('$end', simulation)
-  .otherwise(p.error(3, 'Expected end of all declaration'));
+  .match('$end', commandSpan.end(simulation))
+  .skipTo(enddefinitions);
 
 simulation
+  .match([' ', '\n', '\t'], simulation)
   .select({
-    '$dumpall': 0,
-    '$dumpoff': 1,
-    '$dumpon': 2,
-    '$dumpvars': 3,
-    '$comment': 4
-  }, onSimulation)
-  .otherwise(p.error(4, 'Expected simulation command'));
+    '$dumpall': 101, '$dumpoff': 102, '$dumpon': 103, '$dumpvars': 104,
+    '$comment': 1
+  }, p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
+  .otherwise(p.error(2, 'Expected simulation command'));
 
 inSimulation
-  .match('$end', simulation)
-  .otherwise(p.error(5, 'Expected end simulation command'));
+  .match('$end', commandSpan.end(simulation))
+  .skipTo(inSimulation);
 
 // Build
 

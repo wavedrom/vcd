@@ -33,7 +33,7 @@
     }
 
 #define ASSERT_STRING(name, var) \
-    char var[256]; \
+    char var[4096]; \
     { \
         napi_value tmp; \
         if (napi_coerce_to_string(env, name, &tmp) != napi_ok) { \
@@ -41,7 +41,7 @@
             return 0; \
         } \
         size_t result; \
-        if (napi_get_value_string_latin1(env, tmp, var, 256, &result) != napi_ok) { \
+        if (napi_get_value_string_latin1(env, tmp, var, 4096, &result) != napi_ok) { \
             napi_throw(env, name); \
             return 0; \
         } \
@@ -91,10 +91,59 @@ METHOD(execute) {
     return res;
 }
 
-napi_value Init(napi_env env, napi_value exports) {
-    DECLARE_NAPI_METHOD("init", init)
-    DECLARE_NAPI_METHOD("execute", execute)
-    return exports;
+METHOD(getError) {
+  ASSERT_ARGC(1)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+
+  napi_value res;
+  ASSERT(res, napi_create_int32(env, state->error, &res))
+  return res;
 }
+
+METHOD(getReason) {
+  ASSERT_ARGC(1)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+
+  napi_value res;
+  ASSERT(res, napi_create_string_utf8(env, state->reason, NAPI_AUTO_LENGTH, &res))
+  return res;
+}
+
+METHOD(getErrorPos) {
+  ASSERT_ARGC(1)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+
+  napi_value res;
+  ASSERT(res, napi_create_int32(env, state->error_pos, &res))
+  return res;
+}
+
+METHOD(getCommand) {
+  ASSERT_ARGC(1)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+
+  napi_value res;
+  ASSERT(res, napi_create_int32(env, state->command, &res))
+  return res;
+}
+
+napi_value Init(napi_env env, napi_value exports) {
+  DECLARE_NAPI_METHOD("init", init)
+  DECLARE_NAPI_METHOD("execute", execute)
+  DECLARE_NAPI_METHOD("getError", getError)
+  DECLARE_NAPI_METHOD("getReason", getReason)
+  DECLARE_NAPI_METHOD("getErrorPos", getErrorPos)
+  DECLARE_NAPI_METHOD("getCommand", getCommand)
+  return exports;
+}
+
+int commandSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
+  printf("%d:%.*s\n", s->command, (int)(endp - p - 4), p);
+  return 0;
+};
 
 NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
