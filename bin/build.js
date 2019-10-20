@@ -17,6 +17,7 @@ const inDeclaration = p.node('inDeclaration');
 const enddefinitions = p.node('inDeclarationEnd');
 const simulation = p.node('simulation');
 const inSimulation = p.node('inSimulation');
+const simulationTime = p.node('simulationTime');
 
 declaration
   .match([' ', '\n', '\t'], declaration)
@@ -40,14 +41,22 @@ enddefinitions
 simulation
   .match([' ', '\n', '\t'], simulation)
   .select({
-    '$dumpall': 101, '$dumpoff': 102, '$dumpon': 103, '$dumpvars': 104,
+    '$dumpall': 8, '$dumpoff': 9, '$dumpon': 10, '$dumpvars': 11,
     '$comment': 1
   }, p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
+  .select({'#': 12}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  .select({'0': 13}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  .select({'1': 14}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
   .otherwise(p.error(2, 'Expected simulation command'));
 
 inSimulation
   .match('$end', commandSpan.end(simulation))
   .skipTo(inSimulation);
+
+simulationTime
+  .match([' ', '\n', '\r', '\t'], commandSpan.end(simulation))
+  .skipTo(simulationTime);
+
 
 // Build
 

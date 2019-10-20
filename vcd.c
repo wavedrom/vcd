@@ -142,7 +142,7 @@ napi_value Init(napi_env env, napi_value exports) {
 }
 
 int commandSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  printf("%d:%.*s\n", s->command, (int)(endp - p - 4), p);
+  printf("(%d)%.*s\n", s->command, (int)(endp - p), p);
   return 0;
 };
 
