@@ -48,7 +48,7 @@
     } \
 }
 
-#define ASSERT_BUFFER(name, var) \
+#define ASSERT_BUFFER(name, var, len) \
     const char * var; \
     size_t len; \
     { \
@@ -81,9 +81,9 @@ METHOD(execute) {
     ASSERT_ARGC(2)
     struct vcd_parser_s *state;
     ASSERT_EXTERNAL(args[0], state)
-    ASSERT_BUFFER(args[1], p)
+    ASSERT_BUFFER(args[1], p, plen)
 
-    const int32_t error = vcd_parser_execute(state, p, NULL);
+    const int32_t error = vcd_parser_execute(state, p, p + plen);
 
     napi_value res;
     ASSERT(res, napi_create_int32(env, error, &res))
