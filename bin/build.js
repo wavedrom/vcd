@@ -135,8 +135,10 @@ simulation
     $dumpall: 9, $dumpoff: 10, $dumpon: 11, $dumpvars: 12, $comment: 1
   }, p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
   .select({'#': 13}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
-  .select({'0': 14}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
-  .select({'1': 15}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  .select({
+    '0': 14, '1': 15, x: 16, X: 17, Z: 18
+  }, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  .select({}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
   .otherwise(p.error(4, 'Expected simulation command'));
 
 inSimulation
