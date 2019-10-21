@@ -32,21 +32,6 @@
         } \
     }
 
-#define ASSERT_STRING(name, var) \
-    char var[4096]; \
-    { \
-        napi_value tmp; \
-        if (napi_coerce_to_string(env, name, &tmp) != napi_ok) { \
-            napi_throw(env, name); \
-            return 0; \
-        } \
-        size_t result; \
-        if (napi_get_value_string_latin1(env, tmp, var, 4096, &result) != napi_ok) { \
-            napi_throw(env, name); \
-            return 0; \
-        } \
-    }
-
 #define ASSERT_EXTERNAL(name, var) { \
     napi_valuetype valuetype; \
     if (napi_typeof(env, name, &valuetype) != napi_ok) { \
@@ -63,6 +48,21 @@
     } \
 }
 
+#define ASSERT_BUFFER(name, var) \
+    const char * var; \
+    size_t len; \
+    { \
+        bool result; \
+        if(napi_is_buffer(env, name, &result) != napi_ok) { \
+            napi_throw(env, name); \
+            return 0; \
+        } \
+        if (napi_get_buffer_info(env, name, (void **)&var, &len) != napi_ok) { \
+            napi_throw(env, name); \
+            return 0; \
+        } \
+    }
+
 METHOD(init) {
     struct vcd_parser_s *state = malloc(sizeof *state);
 
@@ -78,13 +78,12 @@ METHOD(init) {
 }
 
 METHOD(execute) {
-    ASSERT_ARGC(3)
+    ASSERT_ARGC(2)
     struct vcd_parser_s *state;
     ASSERT_EXTERNAL(args[0], state)
-    ASSERT_STRING(args[1], p)
-    ASSERT_STRING(args[2], endp)
+    ASSERT_BUFFER(args[1], p)
 
-    const int32_t error = vcd_parser_execute(state, p, endp);
+    const int32_t error = vcd_parser_execute(state, p, NULL);
 
     napi_value res;
     ASSERT(res, napi_create_int32(env, error, &res))
