@@ -50,7 +50,7 @@ declaration
     $comment: 1, $date: 2, $timescale: 4, $upscope: 5, $version: 7
   }, p.invoke(p.code.store('command'), commandSpan.start(inDeclaration)))
   .select({
-    $enddefinitions: 100
+    $enddefinitions: 8
   }, p.invoke(p.code.store('command'), commandSpan.start(enddefinitions)))
   .otherwise(p.error(1, 'Expected declaration command'));
 
@@ -132,12 +132,12 @@ enddefinitions
 simulation
   .match([' ', '\n', '\t'], simulation)
   .select({
-    $dumpall: 8, $dumpoff: 9, $dumpon: 10, $dumpvars: 11, $comment: 1
+    $dumpall: 9, $dumpoff: 10, $dumpon: 11, $dumpvars: 12, $comment: 1
   }, p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
-  .select({'#': 12}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
-  .select({'0': 13}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
-  .select({'1': 14}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
-  .otherwise(p.error(2, 'Expected simulation command'));
+  .select({'#': 13}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  .select({'0': 14}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  .select({'1': 15}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  .otherwise(p.error(4, 'Expected simulation command'));
 
 inSimulation
   .match('$end', commandSpan.end(simulation))
