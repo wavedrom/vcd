@@ -142,7 +142,22 @@ napi_value Init(napi_env env, napi_value exports) {
 }
 
 int commandSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  printf("(%d)%.*s\n", s->command, (int)(endp - p), p);
+  printf("(%d:%d:%d)(%.*s)\n", s->command, s->type, s->size, (int)(endp - p), p);
+  return 0;
+};
+
+int scopeIdentifierSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
+  printf("{%.*s}", (int)(endp - p - 1), p);
+  return 0;
+};
+
+int varSizeSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
+  s->size = strtol(p, &endp, 10);
+  return 0;
+};
+
+int varIdSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
+  printf("{%.*s}", (int)(endp - p - 1), p);
   return 0;
 };
 

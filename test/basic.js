@@ -38,7 +38,7 @@ $date Wed Sep 18 22:59:07 2019
  $end
 $timescale   1ns $end
 
-  $scope module top $end
+  $scope   module   top    $end
     $var wire  1 "}G clock $end
     $scope module leaf $end
       $var wire 64 "}> counter [63:0] $end
