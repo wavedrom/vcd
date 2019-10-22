@@ -44,7 +44,7 @@ $timescale   1ns $end
   $scope   module   top    $end
     $var wire  1 "}G clock $end
     $scope module leaf $end
-      $var wire 64 "}> counter [63:0] $end
+      $var wire 64 {u counter [63:0] $end
     $upscope $end
   $upscope $end
 
@@ -57,8 +57,15 @@ $timescale   1ns $end
 0"}G
 #2
 1"}G
-#3
+#300
 0"}G
+b1111000000000000 {u
+#301
+b0000111100000000 {u
+#302
+b0000000011110000 {u
+#303
+b0000000000001111 {u
 `
 ))).to.eq(0);
     expect(lib.getError(cxt)).to.eq(0);

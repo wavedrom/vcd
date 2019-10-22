@@ -63,10 +63,26 @@
         } \
     }
 
+#define ASSERT_STRING(name, var) \
+    char var[256]; \
+    { \
+        napi_value tmp; \
+        if (napi_coerce_to_string(env, name, &tmp) != napi_ok) { \
+            napi_throw(env, name); \
+            return 0; \
+        } \
+        size_t result; \
+        if (napi_get_value_string_latin1(env, tmp, var, 256, &result) != napi_ok) { \
+            napi_throw(env, name); \
+            return 0; \
+        } \
+    }
+
 METHOD(init) {
     struct vcd_parser_s *state = malloc(sizeof *state);
 
     const int32_t error = vcd_parser_init(state);
+    state->trigger = "HELLO";
 
     napi_value res;
     if (error) {
@@ -130,6 +146,49 @@ METHOD(getCommand) {
   return res;
 }
 
+METHOD(getTime) {
+  ASSERT_ARGC(1)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+
+  napi_value res;
+  ASSERT(res, napi_create_int32(env, state->time, &res))
+  return res;
+}
+
+METHOD(getStart) {
+  ASSERT_ARGC(1)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+
+  napi_value res;
+  ASSERT(res, napi_create_int32(env, state->start, &res))
+  return res;
+}
+
+METHOD(getStop) {
+  ASSERT_ARGC(1)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+
+  napi_value res;
+  ASSERT(res, napi_create_int32(env, state->stop, &res))
+  return res;
+}
+
+METHOD(setTrigger) {
+  ASSERT_ARGC(2)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+  ASSERT_STRING(args[1], trigger)
+
+  state->trigger = *trigger;
+
+  napi_value res;
+  ASSERT(res, napi_create_int32(env, state->error, &res))
+  return res;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   DECLARE_NAPI_METHOD("init", init)
   DECLARE_NAPI_METHOD("execute", execute)
@@ -137,16 +196,20 @@ napi_value Init(napi_env env, napi_value exports) {
   DECLARE_NAPI_METHOD("getReason", getReason)
   DECLARE_NAPI_METHOD("getErrorPos", getErrorPos)
   DECLARE_NAPI_METHOD("getCommand", getCommand)
+  DECLARE_NAPI_METHOD("getTime", getTime)
+  DECLARE_NAPI_METHOD("getStart", getStart)
+  DECLARE_NAPI_METHOD("getStop", getStop)
+  DECLARE_NAPI_METHOD("setTrigger", setTrigger)
   return exports;
 }
 
 int commandSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  printf("(%d:%d:%d)(%.*s)\n", s->command, s->type, s->size, (int)(endp - p), p);
+  // printf("(%d:%d:%d:%d)(%.*s)\n", s->time, s->command, s->type, s->size, (int)(endp - p), p);
   return 0;
 };
 
 int scopeIdentifierSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  printf("{%.*s}", (int)(endp - p - 1), p);
+  // printf("{%.*s}", (int)(endp - p - 1), p);
   return 0;
 };
 
@@ -155,8 +218,42 @@ int varSizeSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* en
   return 0;
 };
 
-int varIdSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  printf("{%.*s}", (int)(endp - p - 1), p);
+bool stringEq (
+  const unsigned char* gold,
+  const unsigned char* p,
+  const unsigned char* endp
+) {
+  for (size_t i = 0; gold[i] != 0; i++) {
+    if (gold[i] != p[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+int idSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
+  // printf("{%.*s}", (int)(endp - p - 1), p);
+  if (stringEq("D1", p, endp)) {
+    if (s->time < 10) {
+      return 0;
+    }
+    if (s->start == 0) {
+      s->start = s->time;
+    } else {
+      s->stop = s->time;
+    }
+  }
+  return 0;
+};
+
+int vectorSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
+  // printf("{%.*s}", (int)(endp - p - 1), p);
+  return 0;
+};
+
+int timeSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
+  s->time = strtol(p, &endp, 10);
+  // printf("%d\n", s->time);
   return 0;
 };
 

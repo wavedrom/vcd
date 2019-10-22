@@ -12,6 +12,17 @@ const p = new llparse.LLParse(prj);
 p.property('i8', 'command');
 p.property('i8', 'type');
 p.property('i32', 'size');
+p.property('i32', 'time');
+p.property('i32', 'start');
+p.property('i32', 'stop');
+p.property('ptr', 'trigger');
+
+const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
+const varSizeSpan = p.span(p.code.span('varSizeSpan'));
+const idSpan = p.span(p.code.span('idSpan'));
+const commandSpan = p.span(p.code.span('commandSpan'));
+const timeSpan = p.span(p.code.span('timeSpan'));
+const vectorSpan = p.span(p.code.span('vectorSpan'));
 
 const declaration = p.node('declaration');
 
@@ -19,26 +30,25 @@ const scopeType = p.node('scopeType');
 const scopeTypeEnd = p.node('scopeTypeEnd');
 
 const scopeIdentifier = p.node('scopeIdentifier');
-const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
 const scopeIdentifierEnd = p.node('scopeIdentifierEnd');
 
 const varType = p.node('varType');
 const varTypeEnd = p.node('varTypeEnd');
 
 const varSize = p.node('varSize');
-const varSizeSpan = p.span(p.code.span('varSizeSpan'));
 const varSizeEnd = p.node('varSizeEnd');
 
 const varId = p.node('varId');
-const varIdSpan = p.span(p.code.span('varIdSpan'));
 const varIdEnd = p.node('varIdEnd');
 
-const commandSpan = p.span(p.code.span('commandSpan'));
 const inDeclaration = p.node('inDeclaration');
 const enddefinitions = p.node('inDeclarationEnd');
 const simulation = p.node('simulation');
 const inSimulation = p.node('inSimulation');
+
 const simulationTime = p.node('simulationTime');
+const simulationVector = p.node('simulationVector');
+const simulationId = p.node('simulationId');
 
 const spaces = [' ', '\n', '\r', '\t'];
 
@@ -113,10 +123,10 @@ varSizeEnd
 
 varId
   .match(spaces, varId)
-  .otherwise(varIdSpan.start(varIdEnd));
+  .otherwise(idSpan.start(varIdEnd));
 
 varIdEnd
-  .match(spaces, varIdSpan.end(inDeclaration))
+  .match(spaces, idSpan.end(inDeclaration))
   .skipTo(varIdEnd);
 
 // $end
@@ -134,11 +144,15 @@ simulation
   .select({
     $dumpall: 9, $dumpoff: 10, $dumpon: 11, $dumpvars: 12, $comment: 1
   }, p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
-  .select({'#': 13}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  .select({
+    '#': 13
+  }, p.invoke(p.code.store('command'), timeSpan.start(simulationTime)))
   .select({
     '0': 14, '1': 15, x: 16, X: 17, Z: 18
-  }, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
-  .select({}, p.invoke(p.code.store('command'), commandSpan.start(simulationTime)))
+  }, p.invoke(p.code.store('command'), idSpan.start(simulationId)))
+  .select({
+    b: 19, B: 20, r: 21, R: 22
+  }, p.invoke(p.code.store('command'), vectorSpan.start(simulationVector)))
   .otherwise(p.error(4, 'Expected simulation command'));
 
 inSimulation
@@ -146,9 +160,16 @@ inSimulation
   .skipTo(inSimulation);
 
 simulationTime
-  .match(spaces, commandSpan.end(simulation))
+  .match(spaces, timeSpan.end(simulation))
   .skipTo(simulationTime);
 
+simulationVector
+  .match(spaces, vectorSpan.end(idSpan.start(simulationId)))
+  .skipTo(simulationVector);
+
+simulationId
+  .match(spaces, idSpan.end(simulation))
+  .skipTo(simulationId);
 
 // Build
 
