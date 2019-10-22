@@ -8,8 +8,8 @@ const lib = require('../index.js');
 const dir = './tmp/';
 
 fs.readdir(dir).then(files => {
-  // files.map(fileName => {
-  async.eachSeries(files, (fileName, callback) => {
+  const tt0 = Date.now();
+  async.eachLimit(files, 2, (fileName, callback) => {
     let len = 0;
     let chunks = 0;
     let goodChunks = 0;
@@ -35,5 +35,7 @@ fs.readdir(dir).then(files => {
       );
       callback();
     });
+  }, () => {
+    console.log('Total time: ' + (Date.now() - tt0) / 1000 + 's');
   });
 });
