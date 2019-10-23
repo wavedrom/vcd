@@ -126,16 +126,6 @@ METHOD(getReason) {
   return res;
 }
 
-METHOD(getErrorPos) {
-  ASSERT_ARGC(1)
-  struct vcd_parser_s *state;
-  ASSERT_EXTERNAL(args[0], state)
-
-  napi_value res;
-  ASSERT(res, napi_create_int32(env, state->error_pos, &res))
-  return res;
-}
-
 METHOD(getCommand) {
   ASSERT_ARGC(1)
   struct vcd_parser_s *state;
@@ -182,7 +172,7 @@ METHOD(setTrigger) {
   ASSERT_EXTERNAL(args[0], state)
   ASSERT_STRING(args[1], trigger)
 
-  state->trigger = *trigger;
+  state->trigger = trigger;
 
   napi_value res;
   ASSERT(res, napi_create_int32(env, state->error, &res))
@@ -194,7 +184,6 @@ napi_value Init(napi_env env, napi_value exports) {
   DECLARE_NAPI_METHOD("execute", execute)
   DECLARE_NAPI_METHOD("getError", getError)
   DECLARE_NAPI_METHOD("getReason", getReason)
-  DECLARE_NAPI_METHOD("getErrorPos", getErrorPos)
   DECLARE_NAPI_METHOD("getCommand", getCommand)
   DECLARE_NAPI_METHOD("getTime", getTime)
   DECLARE_NAPI_METHOD("getStart", getStart)
@@ -202,59 +191,5 @@ napi_value Init(napi_env env, napi_value exports) {
   DECLARE_NAPI_METHOD("setTrigger", setTrigger)
   return exports;
 }
-
-int commandSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  // printf("(%d:%d:%d:%d)(%.*s)\n", s->time, s->command, s->type, s->size, (int)(endp - p), p);
-  return 0;
-};
-
-int scopeIdentifierSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  // printf("{%.*s}", (int)(endp - p - 1), p);
-  return 0;
-};
-
-int varSizeSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  s->size = strtol(p, &endp, 10);
-  return 0;
-};
-
-bool stringEq (
-  const unsigned char* gold,
-  const unsigned char* p,
-  const unsigned char* endp
-) {
-  for (size_t i = 0; gold[i] != 0; i++) {
-    if (gold[i] != p[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-int idSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  // printf("{%.*s}", (int)(endp - p - 1), p);
-  if (stringEq("D1", p, endp)) {
-    if (s->time < 10) {
-      return 0;
-    }
-    if (s->start == 0) {
-      s->start = s->time;
-    } else {
-      s->stop = s->time;
-    }
-  }
-  return 0;
-};
-
-int vectorSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  // printf("{%.*s}", (int)(endp - p - 1), p);
-  return 0;
-};
-
-int timeSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
-  s->time = strtol(p, &endp, 10);
-  // printf("%d\n", s->time);
-  return 0;
-};
 
 NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
