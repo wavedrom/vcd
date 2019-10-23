@@ -1,3 +1,4 @@
+#define NAPI_VERSION 1
 #include <stdio.h>
 #include <stdlib.h>
 #include "vcd_parser.h"
