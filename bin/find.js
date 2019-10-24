@@ -25,12 +25,14 @@ fs.readdir(dir).then(files => {
       chunks++;
     });
     s.on('end', () => {
+      const info = lib.getInfo(cxt);
+      // console.log(info);
       console.log(
         fileName,
         chunks,
         len,
         goodChunks,
-        lib.getStop(cxt) - lib.getStart(cxt),
+        info.stop - info.start,
         ((Date.now() - t0) / 1000 + 's')
       );
       callback();

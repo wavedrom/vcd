@@ -32,7 +32,7 @@ int varSizeSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* en
 
 int idSpan(vcd_parser_t* s, const unsigned char* p, const unsigned char* endp) {
   // printf("{%.*s}", (int)(endp - p - 1), p);
-  if (stringEq((const unsigned char *)("D1"), p, endp)) {
+  if (stringEq((s->trigger), p, endp)) {
     if (s->time < 10) {
       return 0;
     }

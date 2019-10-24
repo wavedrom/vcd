@@ -11,14 +11,22 @@ describe('basic', () => {
   it('type', done => {
     const cxt = lib.init();
     expect(cxt).to.be.an('object');
-    console.log(cxt);
     done();
   });
   it('fail: foo bar', done => {
     const cxt = lib.init();
     expect(lib.execute(cxt, Buffer.from(' foo bar ???'))).to.eq(1);
-    expect(lib.getError(cxt)).to.eq(1);
-    expect(lib.getReason(cxt)).to.eq('Expected declaration command');
+    expect(lib.getInfo(cxt)).to.deep.eq({
+      error: 1,
+      reason: 'Expected declaration command',
+      command: 0,
+      type: 0,
+      size: 0,
+      time: 0,
+      start: 0,
+      stop: 0,
+      trigger: ''
+    });
     done();
   });
   it('$comment', done => {
@@ -26,10 +34,17 @@ describe('basic', () => {
     expect(lib.execute(cxt, Buffer.from(
       ' \n $comment some text $end $comment more text $end ???'
     ))).to.eq(1);
-    expect(lib.getError(cxt)).to.eq(1);
-    expect(lib.getReason(cxt)).to.eq('Expected declaration command');
-    expect(lib.getCommand(cxt)).to.eq(1);
-    // expect(lib.getErrorPos(cxt)).to.eq('Expected declaration');
+    expect(lib.getInfo(cxt)).to.deep.eq({
+      error: 1,
+      reason: 'Expected declaration command',
+      command: 1,
+      type: 0,
+      size: 0,
+      time: 0,
+      start: 0,
+      stop: 0,
+      trigger: ''
+    });
     done();
   });
   it('$version', done => {
@@ -68,9 +83,17 @@ b0000000011110000 {u
 b0000000000001111 {u
 `
 ))).to.eq(0);
-    expect(lib.getError(cxt)).to.eq(0);
-    // expect(lib.getReason(cxt)).to.eq('Expected simulation command');
-    // expect(lib.getCommand(cxt)).to.eq(100);
+    expect(lib.getInfo(cxt)).to.deep.eq({
+      error: 0,
+      reason: 'NO REASON',
+      command: 19,
+      type: 17,
+      size: 64,
+      time: 303,
+      start: 300,
+      stop: 303,
+      trigger: ''
+    });
     done();
   });
 });

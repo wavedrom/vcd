@@ -65,7 +65,6 @@
     }
 
 #define ASSERT_STRING(name, var) \
-    char var[256]; \
     { \
         napi_value tmp; \
         if (napi_coerce_to_string(env, name, &tmp) != napi_ok) { \
@@ -83,7 +82,11 @@ METHOD(init) {
     struct vcd_parser_s *state = malloc(sizeof *state);
 
     const int32_t error = vcd_parser_init(state);
-    state->trigger = "HELLO";
+
+    static char triggerString [256];
+
+    state->trigger = triggerString;
+    state->reason = "NO REASON";
 
     napi_value res;
     if (error) {
@@ -107,73 +110,49 @@ METHOD(execute) {
     return res;
 }
 
-METHOD(getError) {
+METHOD(getInfo) {
   ASSERT_ARGC(1)
   struct vcd_parser_s *state;
   ASSERT_EXTERNAL(args[0], state)
 
-  napi_value res;
-  ASSERT(res, napi_create_int32(env, state->error, &res))
-  return res;
-}
+  napi_value infObj, error, reason, command, type, size, time, start, stop, trigger;
+  ASSERT(infObj, napi_create_object(env, &infObj))
 
-METHOD(getReason) {
-  ASSERT_ARGC(1)
-  struct vcd_parser_s *state;
-  ASSERT_EXTERNAL(args[0], state)
+  ASSERT(error, napi_create_int32(env, state->error, &error))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "error", error))
 
-  napi_value res;
-  ASSERT(res, napi_create_string_utf8(env, state->reason, NAPI_AUTO_LENGTH, &res))
-  return res;
-}
+  ASSERT(reason, napi_create_string_latin1(env, state->reason, NAPI_AUTO_LENGTH, &reason))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "reason", reason))
 
-METHOD(getCommand) {
-  ASSERT_ARGC(1)
-  struct vcd_parser_s *state;
-  ASSERT_EXTERNAL(args[0], state)
+  ASSERT(command, napi_create_int32(env, state->command, &command))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "command", command))
 
-  napi_value res;
-  ASSERT(res, napi_create_int32(env, state->command, &res))
-  return res;
-}
+  ASSERT(type, napi_create_int32(env, state->type, &type))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "type", type))
 
-METHOD(getTime) {
-  ASSERT_ARGC(1)
-  struct vcd_parser_s *state;
-  ASSERT_EXTERNAL(args[0], state)
+  ASSERT(size, napi_create_int32(env, state->size, &size))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "size", size))
 
-  napi_value res;
-  ASSERT(res, napi_create_int32(env, state->time, &res))
-  return res;
-}
+  ASSERT(time, napi_create_int32(env, state->time, &time))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "time", time))
 
-METHOD(getStart) {
-  ASSERT_ARGC(1)
-  struct vcd_parser_s *state;
-  ASSERT_EXTERNAL(args[0], state)
+  ASSERT(start, napi_create_int32(env, state->start, &start))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "start", start))
 
-  napi_value res;
-  ASSERT(res, napi_create_int32(env, state->start, &res))
-  return res;
-}
+  ASSERT(stop, napi_create_int32(env, state->stop, &stop))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "stop", stop))
 
-METHOD(getStop) {
-  ASSERT_ARGC(1)
-  struct vcd_parser_s *state;
-  ASSERT_EXTERNAL(args[0], state)
+  ASSERT(trigger, napi_create_string_latin1(env, state->trigger, NAPI_AUTO_LENGTH, &trigger))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "trigger", trigger))
 
-  napi_value res;
-  ASSERT(res, napi_create_int32(env, state->stop, &res))
-  return res;
+  return infObj;
 }
 
 METHOD(setTrigger) {
   ASSERT_ARGC(2)
   struct vcd_parser_s *state;
   ASSERT_EXTERNAL(args[0], state)
-  ASSERT_STRING(args[1], trigger)
-
-  state->trigger = trigger;
+  ASSERT_STRING(args[1], state->trigger)
 
   napi_value res;
   ASSERT(res, napi_create_int32(env, state->error, &res))
@@ -183,12 +162,7 @@ METHOD(setTrigger) {
 napi_value Init(napi_env env, napi_value exports) {
   DECLARE_NAPI_METHOD("init", init)
   DECLARE_NAPI_METHOD("execute", execute)
-  DECLARE_NAPI_METHOD("getError", getError)
-  DECLARE_NAPI_METHOD("getReason", getReason)
-  DECLARE_NAPI_METHOD("getCommand", getCommand)
-  DECLARE_NAPI_METHOD("getTime", getTime)
-  DECLARE_NAPI_METHOD("getStart", getStart)
-  DECLARE_NAPI_METHOD("getStop", getStop)
+  DECLARE_NAPI_METHOD("getInfo", getInfo)
   DECLARE_NAPI_METHOD("setTrigger", setTrigger)
   return exports;
 }

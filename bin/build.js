@@ -16,6 +16,7 @@ p.property('i32', 'time');
 p.property('i32', 'start');
 p.property('i32', 'stop');
 p.property('ptr', 'trigger');
+p.property('ptr', 'info');
 
 const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
 const varSizeSpan = p.span(p.code.span('varSizeSpan'));
