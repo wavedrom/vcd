@@ -11,8 +11,7 @@
     } \
 }
 
-#define METHOD(name) \
-    napi_value name(napi_env env, napi_callback_info info)
+#define METHOD(name) napi_value name(napi_env env, napi_callback_info info)
 
 #define ASSERT(val, expr) \
     if (expr != napi_ok) { \
@@ -33,22 +32,6 @@
         } \
     }
 
-#define ASSERT_EXTERNAL(name, var) { \
-    napi_valuetype valuetype; \
-    if (napi_typeof(env, name, &valuetype) != napi_ok) { \
-        napi_throw(env, name); \
-        return 0; \
-    } \
-    if (valuetype != napi_external) { \
-        napi_throw_type_error(env, 0, "Wrong arguments"); \
-        return 0; \
-    } \
-    if (napi_get_value_external(env, name, (void **)(&var)) != napi_ok) { \
-        napi_throw(env, name); \
-        return 0; \
-    } \
-}
-
 #define ASSERT_BUFFER(name, var, len) \
     const char * var; \
     size_t len; \
@@ -65,49 +48,84 @@
     }
 
 #define ASSERT_STRING(name, var) \
-    { \
-        napi_value tmp; \
-        if (napi_coerce_to_string(env, name, &tmp) != napi_ok) { \
-            napi_throw(env, name); \
-            return 0; \
-        } \
-        size_t result; \
-        if (napi_get_value_string_latin1(env, tmp, var, 256, &result) != napi_ok) { \
-            napi_throw(env, name); \
-            return 0; \
-        } \
-    }
+  { \
+    napi_value tmp; \
+    if (napi_coerce_to_string(env, name, &tmp) != napi_ok) { \
+      napi_throw(env, name); \
+      return 0; \
+    } \
+    size_t result; \
+    if (napi_get_value_string_latin1(env, tmp, var, 256, &result) != napi_ok) { \
+      napi_throw(env, name); \
+      return 0; \
+    } \
+  }
+
+#define ASSERT_EXTERNAL(name, var) { \
+    napi_valuetype valuetype; \
+    if (napi_typeof(env, name, &valuetype) != napi_ok) { \
+        napi_throw(env, name); \
+        return 0; \
+    } \
+    if (valuetype != napi_external) { \
+        napi_throw_type_error(env, 0, "Wrong arguments"); \
+        return 0; \
+    } \
+    if (napi_get_value_external(env, name, (void **)(&var)) != napi_ok) { \
+        napi_throw(env, name); \
+        return 0; \
+    } \
+}
+
+#define ASSERT_FUNCTION(name, var) { \
+    napi_valuetype valuetype; \
+    if (napi_typeof(env, name, &valuetype) != napi_ok) { \
+        napi_throw(env, name); \
+        return 0; \
+    } \
+    if (valuetype != napi_function) { \
+        napi_throw_type_error(env, 0, "Wrong arguments"); \
+        return 0; \
+    } \
+    var = name; \
+}
+
+// napi_value * var;
+
 
 METHOD(init) {
-    struct vcd_parser_s *state = malloc(sizeof *state);
+  struct vcd_parser_s *state = malloc(sizeof *state);
 
-    const int32_t error = vcd_parser_init(state);
+  const int32_t error = vcd_parser_init(state);
 
-    static char triggerString [256];
+  static char triggerString [256];
 
-    state->trigger = triggerString;
-    state->reason = "NO REASON";
+  state->trigger = triggerString;
+  state->reason = "NO REASON";
 
-    napi_value res;
-    if (error) {
-        ASSERT(res, napi_create_int32(env, error, &res))
-    } else {
-        ASSERT(res, napi_create_external(env, state, 0, 0, &res))
-    }
-    return res;
+  napi_value res;
+  if (error) {
+    ASSERT(res, napi_create_int32(env, error, &res))
+  } else {
+    ASSERT(res, napi_create_external(env, state, 0, 0, &res))
+  }
+  return res;
 }
 
 METHOD(execute) {
-    ASSERT_ARGC(2)
-    struct vcd_parser_s *state;
-    ASSERT_EXTERNAL(args[0], state)
-    ASSERT_BUFFER(args[1], p, plen)
+  ASSERT_ARGC(3)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+  ASSERT_FUNCTION(args[1], state->emit)
+  ASSERT_BUFFER(args[2], p, plen)
 
-    const int32_t error = vcd_parser_execute(state, p, p + plen);
+  state->napi_env = env;
 
-    napi_value res;
-    ASSERT(res, napi_create_int32(env, error, &res))
-    return res;
+  const int32_t error = vcd_parser_execute(state, p, p + plen);
+
+  napi_value res;
+  ASSERT(res, napi_create_int32(env, error, &res))
+  return res;
 }
 
 METHOD(getInfo) {
@@ -115,7 +133,7 @@ METHOD(getInfo) {
   struct vcd_parser_s *state;
   ASSERT_EXTERNAL(args[0], state)
 
-  napi_value infObj, error, reason, command, type, size, time, start, stop, trigger;
+  napi_value infObj, error, reason, command, type, size, time, trigger;
   ASSERT(infObj, napi_create_object(env, &infObj))
 
   ASSERT(error, napi_create_int32(env, state->error, &error))
@@ -135,12 +153,6 @@ METHOD(getInfo) {
 
   ASSERT(time, napi_create_int32(env, state->time, &time))
   ASSERT(infObj, napi_set_named_property(env, infObj, "time", time))
-
-  ASSERT(start, napi_create_int32(env, state->start, &start))
-  ASSERT(infObj, napi_set_named_property(env, infObj, "start", start))
-
-  ASSERT(stop, napi_create_int32(env, state->stop, &stop))
-  ASSERT(infObj, napi_set_named_property(env, infObj, "stop", stop))
 
   ASSERT(trigger, napi_create_string_latin1(env, state->trigger, NAPI_AUTO_LENGTH, &trigger))
   ASSERT(infObj, napi_set_named_property(env, infObj, "trigger", trigger))

@@ -13,10 +13,10 @@ p.property('i8', 'command');
 p.property('i8', 'type');
 p.property('i32', 'size');
 p.property('i32', 'time');
-p.property('i32', 'start');
-p.property('i32', 'stop');
 p.property('ptr', 'trigger');
 p.property('ptr', 'info');
+p.property('ptr', 'emit');
+p.property('ptr', 'napi_env');
 
 const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
 const varSizeSpan = p.span(p.code.span('varSizeSpan'));
