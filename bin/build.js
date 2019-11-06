@@ -15,11 +15,14 @@ p.property('i32', 'size');
 p.property('i32', 'time');
 p.property('ptr', 'trigger');
 p.property('ptr', 'info');
-p.property('ptr', 'emit');
+p.property('ptr', 'triee');
+p.property('ptr', 'lifee');
+p.property('ptr', 'hier');
 p.property('ptr', 'napi_env');
 
 const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
 const varSizeSpan = p.span(p.code.span('varSizeSpan'));
+const varIdSpan = p.span(p.code.span('varIdSpan'));
 const idSpan = p.span(p.code.span('idSpan'));
 const commandSpan = p.span(p.code.span('commandSpan'));
 const timeSpan = p.span(p.code.span('timeSpan'));
@@ -53,16 +56,42 @@ const simulationId = p.node('simulationId');
 
 const spaces = [' ', '\n', '\r', '\t'];
 
+const objection = lut => arg => arg.split(/\s+/).reduce((res, key) => {
+  if (lut[key] === undefined) {
+    throw new Error(key);
+  }
+  res[key] = lut[key];
+  return res;
+}, {});
+
+const cmd = objection({
+  $comment: 1,
+  $date: 2,
+  $scope: 3,
+  $timescale: 4,
+  $upscope: 5,
+  $var: 6,
+  $version: 7,
+  $enddefinitions: 8,
+  $dumpall: 9,
+  $dumpoff: 10,
+  $dumpon: 11,
+  $dumpvars: 12,
+  '#': 13,
+  '0': 14, '1': 15, x: 16, X: 17, Z: 18,
+  b: 19, B: 20, r: 21, R: 22
+});
+
 declaration
   .match(spaces, declaration)
-  .select({$scope: 3}, p.invoke(p.code.store('command'), commandSpan.start(scopeType)))
-  .select({$var: 6},   p.invoke(p.code.store('command'), commandSpan.start(varType)))
-  .select({
-    $comment: 1, $date: 2, $timescale: 4, $upscope: 5, $version: 7
-  }, p.invoke(p.code.store('command'), commandSpan.start(inDeclaration)))
-  .select({
-    $enddefinitions: 8
-  }, p.invoke(p.code.store('command'), commandSpan.start(enddefinitions)))
+  .select(cmd('$scope'),
+    p.invoke(p.code.store('command'), commandSpan.start(scopeType)))
+  .select(cmd('$var'),
+    p.invoke(p.code.store('command'), commandSpan.start(varType)))
+  .select(cmd('$comment $date $timescale $upscope $version'),
+    p.invoke(p.code.store('command'), commandSpan.start(inDeclaration)))
+  .select(cmd('$enddefinitions'),
+    p.invoke(p.code.store('command'), commandSpan.start(enddefinitions)))
   .otherwise(p.error(1, 'Expected declaration command'));
 
 // $scope
@@ -72,9 +101,8 @@ scopeType
   .otherwise(scopeTypeEnd);
 
 scopeTypeEnd
-  .select({
-    begin: 1, fork: 2, function: 3, module: 4, task: 5
-  }, p.invoke(p.code.store('type'), scopeIdentifier))
+  .select({begin: 1, fork: 2, function: 3, module: 4, task: 5},
+    p.invoke(p.code.store('type'), scopeIdentifier))
   .otherwise(p.error(2, 'Expected scope type'));
 
 scopeIdentifier
@@ -124,10 +152,10 @@ varSizeEnd
 
 varId
   .match(spaces, varId)
-  .otherwise(idSpan.start(varIdEnd));
+  .otherwise(varIdSpan.start(varIdEnd));
 
 varIdEnd
-  .match(spaces, idSpan.end(inDeclaration))
+  .match(spaces, varIdSpan.end(inDeclaration))
   .skipTo(varIdEnd);
 
 // $end
@@ -142,18 +170,14 @@ enddefinitions
 
 simulation
   .match([' ', '\n', '\t'], simulation)
-  .select({
-    $dumpall: 9, $dumpoff: 10, $dumpon: 11, $dumpvars: 12, $comment: 1
-  }, p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
-  .select({
-    '#': 13
-  }, p.invoke(p.code.store('command'), timeSpan.start(simulationTime)))
-  .select({
-    '0': 14, '1': 15, x: 16, X: 17, Z: 18
-  }, p.invoke(p.code.store('command'), idSpan.start(simulationId)))
-  .select({
-    b: 19, B: 20, r: 21, R: 22
-  }, p.invoke(p.code.store('command'), vectorSpan.start(simulationVector)))
+  .select(cmd('$dumpall $dumpoff $dumpon $dumpvars $comment'),
+    p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
+  .select(cmd('#'),
+    p.invoke(p.code.store('command'), timeSpan.start(simulationTime)))
+  .select(cmd('0 1 x X Z'),
+    p.invoke(p.code.store('command'), idSpan.start(simulationId)))
+  .select(cmd('b B r R'),
+    p.invoke(p.code.store('command'), vectorSpan.start(simulationVector)))
   .otherwise(p.error(4, 'Expected simulation command'));
 
 inSimulation

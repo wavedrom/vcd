@@ -90,39 +90,88 @@
     var = name; \
 }
 
-// napi_value * var;
+#define ASSERT_OBJECT(name, var) { \
+    napi_valuetype valuetype; \
+    if (napi_typeof(env, name, &valuetype) != napi_ok) { \
+        napi_throw(env, name); \
+        return 0; \
+    } \
+    if (valuetype != napi_object) { \
+        napi_throw_type_error(env, 0, "Wrong arguments"); \
+        return 0; \
+    } \
+    var = name; \
+}
+
+
 
 
 METHOD(init) {
+  napi_value res;
+
   struct vcd_parser_s *state = malloc(sizeof *state);
 
   const int32_t error = vcd_parser_init(state);
+  if (error) {
+    ASSERT(res, napi_create_int32(env, error, &res))
+    return res;
+  }
+
+  ASSERT_ARGC(3)
+  ASSERT_FUNCTION(args[0], state->lifee)
+  ASSERT_FUNCTION(args[1], state->triee)
+  ASSERT_OBJECT(args[2], state->hier)
 
   static char triggerString [256];
 
   state->trigger = triggerString;
   state->reason = "NO REASON";
+  state->napi_env = env;
 
+  napi_value status;
+  ASSERT(status, napi_create_string_latin1(env, "declaration", NAPI_AUTO_LENGTH, &status))
+  ASSERT(state->hier, napi_set_named_property(env, state->hier, "status", status))
+
+  // napi_value hierObj;
+  // ASSERT(hierObj, napi_create_object(env, &hierObj))
+  // state->hier = hierObj;
+
+  // ASSERT(state->hier, napi_create_object(env, &state->hier))
+
+  ASSERT(res, napi_create_external(env, state, 0, 0, &res))
+  return res;
+}
+
+METHOD(done) {
+  ASSERT_ARGC(4)
+  struct vcd_parser_s *state;
+  // last use of all external objects
+  napi_value lifee, triee, hier;
+  ASSERT_EXTERNAL(args[0], state)
+  ASSERT_FUNCTION(args[1], lifee)
+  ASSERT_FUNCTION(args[2], triee)
+  ASSERT_OBJECT(args[3], hier)
+
+  // FIXME destroy parser state
+
+  const int32_t error = 0;
   napi_value res;
-  if (error) {
-    ASSERT(res, napi_create_int32(env, error, &res))
-  } else {
-    ASSERT(res, napi_create_external(env, state, 0, 0, &res))
-  }
+  ASSERT(res, napi_create_int32(env, error, &res))
   return res;
 }
 
 METHOD(execute) {
-  ASSERT_ARGC(3)
+  ASSERT_ARGC(5)
   struct vcd_parser_s *state;
   ASSERT_EXTERNAL(args[0], state)
-  ASSERT_FUNCTION(args[1], state->emit)
-  ASSERT_BUFFER(args[2], p, plen)
+  ASSERT_FUNCTION(args[1], state->lifee)
+  ASSERT_FUNCTION(args[2], state->triee)
+  ASSERT_OBJECT(args[3], state->hier)
+  ASSERT_BUFFER(args[4], p, plen)
 
   state->napi_env = env;
 
   const int32_t error = vcd_parser_execute(state, p, p + plen);
-
   napi_value res;
   ASSERT(res, napi_create_int32(env, error, &res))
   return res;
@@ -134,27 +183,24 @@ METHOD(getInfo) {
   ASSERT_EXTERNAL(args[0], state)
 
   napi_value infObj, error, reason, command, type, size, time, trigger;
+
   ASSERT(infObj, napi_create_object(env, &infObj))
-
   ASSERT(error, napi_create_int32(env, state->error, &error))
-  ASSERT(infObj, napi_set_named_property(env, infObj, "error", error))
-
   ASSERT(reason, napi_create_string_latin1(env, state->reason, NAPI_AUTO_LENGTH, &reason))
-  ASSERT(infObj, napi_set_named_property(env, infObj, "reason", reason))
-
   ASSERT(command, napi_create_int32(env, state->command, &command))
-  ASSERT(infObj, napi_set_named_property(env, infObj, "command", command))
-
   ASSERT(type, napi_create_int32(env, state->type, &type))
-  ASSERT(infObj, napi_set_named_property(env, infObj, "type", type))
-
   ASSERT(size, napi_create_int32(env, state->size, &size))
-  ASSERT(infObj, napi_set_named_property(env, infObj, "size", size))
-
   ASSERT(time, napi_create_int32(env, state->time, &time))
-  ASSERT(infObj, napi_set_named_property(env, infObj, "time", time))
-
   ASSERT(trigger, napi_create_string_latin1(env, state->trigger, NAPI_AUTO_LENGTH, &trigger))
+
+  // ASSERT(state->hier, napi_create_object(env, &state->hier))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "hier", state->hier))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "error", error))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "reason", reason))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "command", command))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "type", type))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "size", size))
+  ASSERT(infObj, napi_set_named_property(env, infObj, "time", time))
   ASSERT(infObj, napi_set_named_property(env, infObj, "trigger", trigger))
 
   return infObj;
@@ -173,6 +219,7 @@ METHOD(setTrigger) {
 
 napi_value Init(napi_env env, napi_value exports) {
   DECLARE_NAPI_METHOD("init", init)
+  DECLARE_NAPI_METHOD("done", done)
   DECLARE_NAPI_METHOD("execute", execute)
   DECLARE_NAPI_METHOD("getInfo", getInfo)
   DECLARE_NAPI_METHOD("setTrigger", setTrigger)
