@@ -3,5 +3,5 @@ build
 coverage
 node_modules
 package-lock.json
-vcd_parser.*
+*.dot
 tmp
