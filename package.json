@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "eslint bin && nyc -r=text -r=lcov mocha",
-    "install": "node bin/build.js && node-gyp rebuild"
+    "build": "node bin/build.js && node-gyp rebuild"
   },
   "repository": {
     "type": "git",
