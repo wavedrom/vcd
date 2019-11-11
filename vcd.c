@@ -55,7 +55,7 @@
       return 0; \
     } \
     size_t result; \
-    if (napi_get_value_string_latin1(env, tmp, var, 256, &result) != napi_ok) { \
+    if (napi_get_value_string_latin1(env, tmp, var, 4096, &result) != napi_ok) { \
       napi_throw(env, name); \
       return 0; \
     } \
@@ -122,7 +122,7 @@ METHOD(init) {
   ASSERT_FUNCTION(args[1], state->triee)
   ASSERT_OBJECT(args[2], state->hier)
 
-  static char triggerString [256];
+  static char triggerString [4096] = "       ";
 
   state->trigger = triggerString;
   state->reason = "NO REASON";

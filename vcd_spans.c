@@ -9,19 +9,31 @@
     }
 
 int stringEq (
-  const unsigned char* gold,
+  const unsigned char* gold, // search pattern
   const unsigned char* p,
   const unsigned char* endp
 ) {
-  if (gold[0] == 0) {
-    return 0;
-  }
-  for (size_t i = 0; gold[i] != 0; i++) {
-    if (gold[i] != p[i]) {
+  unsigned char* i;
+  unsigned char* j;
+  i = gold;
+  j = p;
+  while (1) {
+    if (*i == ' ') { // end of search pattern
       return 0;
     }
+    while (*i == *j) { // follow matching trail
+      i++;
+      j++;
+    }
+    if ((*i == ' ') && (j == (endp - 1))) { // exact match
+      return 1;
+    }
+    while (*i != ' ') { // skip to the end of pattern word
+      i++;
+    }
+    i++;
+    j = p; // try another word
   }
-  return 1;
 }
 
 int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {

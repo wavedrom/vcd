@@ -1,7 +1,7 @@
 'use strict';
 
 const expect = require('chai').expect;
-const vcd = require('../index.js');
+const vcd = require('../lib/index.js');
 
 describe('basic', () => {
 
