@@ -4,8 +4,7 @@
 const fs = require('fs-extra');
 const async = require('async');
 
-const vcd = require('../lib/index.js');
-const utils = require('../lib/utils');
+const lib = require('../lib/index.js');
 
 const dir = './tmp/';
 
@@ -19,11 +18,11 @@ fs.readdir(dir).then(files => {
 
     const t0 = Date.now();
 
-    let inst = vcd();
+    let inst = lib.parser();
 
-    const loads = utils.and();
-    const stores = utils.and();
-    const duration = utils.activity(10);
+    const loads = lib.and();
+    const stores = lib.and();
+    const duration = lib.activity(10);
 
     inst.on('$enddefinitions', () => {
       // console.log(res);
