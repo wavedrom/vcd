@@ -4,36 +4,43 @@
 const fs = require('fs-extra');
 const async = require('async');
 
-const vcd = require('../index.js');
+const vcd = require('../lib/index.js');
+const utils = require('../lib/utils');
 
 const dir = './tmp/';
 
 fs.readdir(dir).then(files => {
   const tt0 = Date.now();
   async.eachLimit(files, 2, (fileName, callback) => {
+    if (!fileName.match(/.vcd$/)) {
+      callback();
+      return;
+    }
 
-    let start = 0;
-    let stop = 0;
     const t0 = Date.now();
 
     let inst = vcd();
 
+    const loads = utils.and();
+    const stores = utils.and();
+    const duration = utils.activity(10);
+
     inst.on('$enddefinitions', () => {
       // console.log(res);
       // console.log(inst.info);
-      inst.onTrigger('D1', time => {
-        if (time > 10) {
-          if (start == 0) {
-            start = time;
-          } else {
-            stop = time;
-          }
-        }
+      inst.change.on('D7', (time, cmd) => { // mem_i_load
+        loads.onA(time, cmd);
+        stores.onNotA(time, cmd);
+      });
+      inst.change.on('D1', (time, cmd) => { // mem_i_valid
+        loads.onB(time, cmd);
+        stores.onB(time, cmd);
+        duration.on(time);
       });
     });
 
     inst.on('finish', () => {
-      console.log(fileName, (stop - start), ((Date.now() - t0) / 1000 + 's'));
+      console.log(fileName, duration.time(), loads.time(), stores.time(), ((Date.now() - t0) / 1000 + 's'));
       callback();
     });
 
