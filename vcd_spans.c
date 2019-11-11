@@ -67,12 +67,14 @@ int varIdSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* 
 int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
   napi_env env = state->napi_env;
   if (stringEq((state->trigger), p, endp)) {
-    napi_value undefined, eventName, eventPayload, return_val;
+    napi_value undefined, eventName, eventPayload1, eventPayload2, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
-    ASSERT(eventName, napi_create_string_latin1(env, state->trigger, NAPI_AUTO_LENGTH, &eventName))
-    ASSERT(eventPayload, napi_create_int32(env, state->time, &eventPayload))
-    napi_value* argv[] = { &eventName, &eventPayload };
-    ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 2, *argv, &return_val))
+    ASSERT(eventName, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &eventName))
+    ASSERT(eventPayload1, napi_create_int32(env, state->time, &eventPayload1))
+    ASSERT(eventPayload2, napi_create_int32(env, state->command, &eventPayload2))
+    napi_value* argv[] = { &eventName, &eventPayload1, &eventPayload2 };
+    ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 3, *argv, &return_val))
+    // printf("{%.*s}", (int)(endp - p - 1), p);
   }
   return 0;
 }
