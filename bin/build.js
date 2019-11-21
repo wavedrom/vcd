@@ -14,15 +14,17 @@ p.property('i8', 'type');
 p.property('i32', 'size');
 p.property('i32', 'time');
 p.property('ptr', 'trigger');
-p.property('ptr', 'info');
 p.property('ptr', 'triee');
 p.property('ptr', 'lifee');
-p.property('ptr', 'hier');
+p.property('ptr', 'info');
+p.property('i32', 'stackPointer');
+p.property('ptr', 'id');
 p.property('ptr', 'napi_env');
 
 const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
 const varSizeSpan = p.span(p.code.span('varSizeSpan'));
 const varIdSpan = p.span(p.code.span('varIdSpan'));
+const varNameSpan = p.span(p.code.span('varNameSpan'));
 const idSpan = p.span(p.code.span('idSpan'));
 const commandSpan = p.span(p.code.span('commandSpan'));
 const timeSpan = p.span(p.code.span('timeSpan'));
@@ -44,6 +46,9 @@ const varSizeEnd = p.node('varSizeEnd');
 
 const varId = p.node('varId');
 const varIdEnd = p.node('varIdEnd');
+
+const varName = p.node('varName');
+const varNameEnd = p.node('varNameEnd');
 
 const inDeclaration = p.node('inDeclaration');
 const enddefinitions = p.node('inDeclarationEnd');
@@ -155,8 +160,16 @@ varId
   .otherwise(varIdSpan.start(varIdEnd));
 
 varIdEnd
-  .match(spaces, varIdSpan.end(inDeclaration))
+  .match(spaces, varIdSpan.end(varName))
   .skipTo(varIdEnd);
+
+varName
+  .match(spaces, varName)
+  .otherwise(varNameSpan.start(varNameEnd));
+
+varNameEnd
+  .match(spaces, varNameSpan.end(inDeclaration))
+  .skipTo(varNameEnd);
 
 // $end
 

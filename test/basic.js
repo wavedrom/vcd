@@ -50,6 +50,9 @@ $timescale   1ns $end
     $scope module leaf $end
       $var wire 64 {u counter [63:0] $end
     $upscope $end
+    $scope module fruit $end
+      $var wire 4 {u point [3:0] $end
+    $upscope $end
   $upscope $end
 
   $enddefinitions $end

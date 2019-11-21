@@ -17,25 +17,26 @@ fs.readdir(dir).then(files => {
     }
 
     const t0 = Date.now();
-
-    let inst = lib.parser();
-
+    const inst = lib.parser();
     const loads = lib.and();
     const stores = lib.and();
     const duration = lib.activity(10);
 
     inst.on('$enddefinitions', () => {
-      // console.log(res);
-      // console.log(inst.info);
-      inst.change.on('D7', (time, cmd) => { // mem_i_load
-        loads.onA(time, cmd);
-        stores.onNotA(time, cmd);
-      });
-      inst.change.on('D1', (time, cmd) => { // mem_i_valid
-        loads.onB(time, cmd);
-        stores.onB(time, cmd);
-        duration.on(time);
-      });
+      const _ = inst.info.wires;
+      inst.change.on(_.top.TestDriver.testHarness.system.tile.vpu.mem_i_load,
+        (time, cmd) => {
+          loads.onA(time, cmd);
+          stores.onNotA(time, cmd);
+        }
+      );
+      inst.change.on(_.top.TestDriver.testHarness.system.tile.vpu.mem_i_valid,
+        (time, cmd) => {
+          loads.onB(time, cmd);
+          stores.onB(time, cmd);
+          duration.on(time);
+        }
+      );
     });
 
     inst.on('finish', () => {
