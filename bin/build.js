@@ -17,6 +17,7 @@ p.property('ptr', 'trigger');
 p.property('ptr', 'triee');
 p.property('ptr', 'lifee');
 p.property('ptr', 'info');
+p.property('ptr', 'tmpStr');
 p.property('i32', 'stackPointer');
 p.property('ptr', 'id');
 p.property('ptr', 'napi_env');

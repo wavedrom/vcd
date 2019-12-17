@@ -8,6 +8,17 @@
         napi_throw(env, val); \
     }
 
+void strcopy(const unsigned char* p, const unsigned char* endp, unsigned char* dst) {
+  unsigned char* src;
+  src = p;
+  while (src < (endp - 1)) {
+    *dst = *src;
+    src++;
+    dst++;
+  }
+  *dst = 0;
+}
+
 // FIXME use a better structure to match strings
 int stringEq (
   const unsigned char* gold, // search pattern
@@ -60,15 +71,16 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
   return 0;
 }
 
-int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, /* FIXME const */ unsigned char* endp) {
+int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
   napi_env env = state->napi_env;
-  *(endp - 1) = 0; // FIXME NULL termination of ASCII string
+  // *(endp - 1) = 0; // FIXME NULL termination of ASCII string
+  strcopy(p, endp, state->tmpStr);
   napi_value name, obj, stack, top;
   ASSERT(name, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &name))
   ASSERT(obj, napi_create_object(env, &obj))
   ASSERT(state->info, napi_get_named_property(env, state->info, "stack", &stack))
   ASSERT(top, napi_get_element(env, stack, state->stackPointer, &top))
-  ASSERT(top, napi_set_named_property(env, top, p, obj))
+  ASSERT(top, napi_set_named_property(env, top, state->tmpStr, obj))
   state->stackPointer += 1;
   ASSERT(top, napi_set_element(env, stack, state->stackPointer, obj))
   return 0;
@@ -81,18 +93,21 @@ int varSizeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 
 int varIdSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
   napi_env env = state->napi_env;
-  napi_value val;
-  ASSERT(state->id, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &state->id))
+  napi_value varId;
+  ASSERT(varId, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &varId))
+  ASSERT(state->info, napi_set_named_property(env, state->info, "varId", varId))
   return 0;
 }
 
-int varNameSpan(vcd_parser_t* state, const unsigned char* p, /* FIXME const */ unsigned char* endp) {
+int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
   napi_env env = state->napi_env;
-  *(endp - 1) = 0; // FIXME NULL termination of ASCII string
-  napi_value stack, top;
+  // *(endp - 1) = 0; // FIXME NULL termination of ASCII string
+  strcopy(p, endp, state->tmpStr);
+  napi_value stack, top, varId;
   ASSERT(state->info, napi_get_named_property(env, state->info, "stack", &stack))
   ASSERT(top, napi_get_element(env, stack, state->stackPointer, &top))
-  ASSERT(state->info, napi_set_named_property(env, top, p, state->id))
+  ASSERT(state->info, napi_get_named_property(env, state->info, "varId", &varId))
+  ASSERT(state->info, napi_set_named_property(env, top, state->tmpStr, varId))
   return 0;
 }
 

@@ -123,10 +123,12 @@ METHOD(init) {
   ASSERT_OBJECT(args[2], state->info)
 
   static char triggerString [4096] = "       ";
+  static char tmpStr [4096] = "       ";
 
   state->trigger = triggerString;
   state->reason = "NO REASON";
   state->napi_env = env;
+  state->tmpStr = tmpStr;
 
   napi_value status;
   ASSERT(status, napi_create_string_latin1(env, "declaration", NAPI_AUTO_LENGTH, &status))
