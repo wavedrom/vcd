@@ -1,225 +1,241 @@
 #!/usr/bin/env node
 'use strict';
 
-const fs = require('fs');
+const fs = require('fs-extra');
+const cp = require('child_process');
 const llparse = require('llparse');
-const llparseDot = require('llparse-dot');
 
-const prj = 'vcd_parser';
-const p = new llparse.LLParse(prj);
+const gyp = cb => {
+  console.log('build');
+  const proc = cp.spawn('node-gyp', ['configure', 'build']);
+  proc.stderr.on('data', data => {
+    console.error(data.toString());
+  });
+  proc.on('close', (cb || (() => {
+    console.log('done');
+  })));
+};
 
-// Add custom uint8_t property to the state
-p.property('i8', 'command');
-p.property('i8', 'type');
-p.property('i32', 'size');
-p.property('i32', 'time');
-p.property('ptr', 'trigger');
-p.property('ptr', 'triee');
-p.property('ptr', 'lifee');
-p.property('ptr', 'info');
-p.property('ptr', 'tmpStr');
-p.property('i32', 'stackPointer');
-p.property('ptr', 'id');
-p.property('ptr', 'napi_env');
+const generate = cb => {
+  // const llparseDot = require('llparse-dot');
 
-const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
-const varSizeSpan = p.span(p.code.span('varSizeSpan'));
-const varIdSpan = p.span(p.code.span('varIdSpan'));
-const varNameSpan = p.span(p.code.span('varNameSpan'));
-const idSpan = p.span(p.code.span('idSpan'));
-const commandSpan = p.span(p.code.span('commandSpan'));
-const timeSpan = p.span(p.code.span('timeSpan'));
-const vectorSpan = p.span(p.code.span('vectorSpan'));
+  const prj = 'vcd_parser';
+  const p = new llparse.LLParse(prj);
 
-const declaration = p.node('declaration');
+  // Add custom uint8_t property to the state
+  p.property('i8', 'command');
+  p.property('i8', 'type');
+  p.property('i32', 'size');
+  p.property('i32', 'time');
+  p.property('ptr', 'trigger');
+  p.property('ptr', 'triee');
+  p.property('ptr', 'lifee');
+  p.property('ptr', 'info');
+  p.property('ptr', 'tmpStr');
+  p.property('i32', 'stackPointer');
+  p.property('ptr', 'id');
+  p.property('ptr', 'napi_env');
 
-const scopeType = p.node('scopeType');
-const scopeTypeEnd = p.node('scopeTypeEnd');
+  const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
+  const varSizeSpan = p.span(p.code.span('varSizeSpan'));
+  const varIdSpan = p.span(p.code.span('varIdSpan'));
+  const varNameSpan = p.span(p.code.span('varNameSpan'));
+  const idSpan = p.span(p.code.span('idSpan'));
+  const commandSpan = p.span(p.code.span('commandSpan'));
+  const timeSpan = p.span(p.code.span('timeSpan'));
+  const vectorSpan = p.span(p.code.span('vectorSpan'));
 
-const scopeIdentifier = p.node('scopeIdentifier');
-const scopeIdentifierEnd = p.node('scopeIdentifierEnd');
+  const declaration = p.node('declaration');
 
-const varType = p.node('varType');
-const varTypeEnd = p.node('varTypeEnd');
+  const scopeType = p.node('scopeType');
+  const scopeTypeEnd = p.node('scopeTypeEnd');
 
-const varSize = p.node('varSize');
-const varSizeEnd = p.node('varSizeEnd');
+  const scopeIdentifier = p.node('scopeIdentifier');
+  const scopeIdentifierEnd = p.node('scopeIdentifierEnd');
 
-const varId = p.node('varId');
-const varIdEnd = p.node('varIdEnd');
+  const varType = p.node('varType');
+  const varTypeEnd = p.node('varTypeEnd');
 
-const varName = p.node('varName');
-const varNameEnd = p.node('varNameEnd');
+  const varSize = p.node('varSize');
+  const varSizeEnd = p.node('varSizeEnd');
 
-const inDeclaration = p.node('inDeclaration');
-const enddefinitions = p.node('inDeclarationEnd');
-const simulation = p.node('simulation');
-const inSimulation = p.node('inSimulation');
+  const varId = p.node('varId');
+  const varIdEnd = p.node('varIdEnd');
 
-const simulationTime = p.node('simulationTime');
-const simulationVector = p.node('simulationVector');
-const simulationId = p.node('simulationId');
+  const varName = p.node('varName');
+  const varNameEnd = p.node('varNameEnd');
 
-const spaces = [' ', '\n', '\r', '\t'];
+  const inDeclaration = p.node('inDeclaration');
+  const enddefinitions = p.node('inDeclarationEnd');
+  const simulation = p.node('simulation');
+  const inSimulation = p.node('inSimulation');
 
-const objection = lut => arg => arg.split(/\s+/).reduce((res, key) => {
-  if (lut[key] === undefined) {
-    throw new Error(key);
-  }
-  res[key] = lut[key];
-  return res;
-}, {});
+  const simulationTime = p.node('simulationTime');
+  const simulationVector = p.node('simulationVector');
+  const simulationId = p.node('simulationId');
 
-const cmd = objection({
-  $comment: 1,
-  $date: 2,
-  $scope: 3,
-  $timescale: 4,
-  $upscope: 5,
-  $var: 6,
-  $version: 7,
-  $enddefinitions: 8,
-  $dumpall: 9,
-  $dumpoff: 10,
-  $dumpon: 11,
-  $dumpvars: 12,
-  '#': 13,
-  '0': 14, '1': 15, x: 16, X: 17, Z: 18,
-  b: 19, B: 20, r: 21, R: 22
-});
+  const spaces = [' ', '\n', '\r', '\t'];
 
-declaration
-  .match(spaces, declaration)
-  .select(cmd('$scope'),
-    p.invoke(p.code.store('command'), commandSpan.start(scopeType)))
-  .select(cmd('$var'),
-    p.invoke(p.code.store('command'), commandSpan.start(varType)))
-  .select(cmd('$comment $date $timescale $upscope $version'),
-    p.invoke(p.code.store('command'), commandSpan.start(inDeclaration)))
-  .select(cmd('$enddefinitions'),
-    p.invoke(p.code.store('command'), commandSpan.start(enddefinitions)))
-  .otherwise(p.error(1, 'Expected declaration command'));
+  const objection = lut => arg => arg.split(/\s+/).reduce((res, key) => {
+    if (lut[key] === undefined) {
+      throw new Error(key);
+    }
+    res[key] = lut[key];
+    return res;
+  }, {});
 
-// $scope
+  const cmd = objection({
+    $comment: 1,
+    $date: 2,
+    $scope: 3,
+    $timescale: 4,
+    $upscope: 5,
+    $var: 6,
+    $version: 7,
+    $enddefinitions: 8,
+    $dumpall: 9,
+    $dumpoff: 10,
+    $dumpon: 11,
+    $dumpvars: 12,
+    '#': 13,
+    '0': 14, '1': 15, x: 16, X: 17, Z: 18,
+    b: 19, B: 20, r: 21, R: 22
+  });
 
-scopeType
-  .match(spaces, scopeType)
-  .otherwise(scopeTypeEnd);
+  declaration
+    .match(spaces, declaration)
+    .select(cmd('$scope'),
+      p.invoke(p.code.store('command'), commandSpan.start(scopeType)))
+    .select(cmd('$var'),
+      p.invoke(p.code.store('command'), commandSpan.start(varType)))
+    .select(cmd('$comment $date $timescale $upscope $version'),
+      p.invoke(p.code.store('command'), commandSpan.start(inDeclaration)))
+    .select(cmd('$enddefinitions'),
+      p.invoke(p.code.store('command'), commandSpan.start(enddefinitions)))
+    .otherwise(p.error(1, 'Expected declaration command'));
 
-scopeTypeEnd
-  .select({begin: 1, fork: 2, function: 3, module: 4, task: 5},
-    p.invoke(p.code.store('type'), scopeIdentifier))
-  .otherwise(p.error(2, 'Expected scope type'));
+  // $scope
 
-scopeIdentifier
-  .match(spaces, scopeIdentifier)
-  .otherwise(scopeIdentifierSpan.start(scopeIdentifierEnd));
+  scopeType
+    .match(spaces, scopeType)
+    .otherwise(scopeTypeEnd);
 
-scopeIdentifierEnd
-  .match(spaces, scopeIdentifierSpan.end(inDeclaration))
-  .skipTo(scopeIdentifierEnd);
+  scopeTypeEnd
+    .select({begin: 1, fork: 2, function: 3, module: 4, task: 5},
+      p.invoke(p.code.store('type'), scopeIdentifier))
+    .otherwise(p.error(2, 'Expected scope type'));
 
-// $var
+  scopeIdentifier
+    .match(spaces, scopeIdentifier)
+    .otherwise(scopeIdentifierSpan.start(scopeIdentifierEnd));
 
-varType
-  .match(spaces, varType)
-  .otherwise(varTypeEnd);
+  scopeIdentifierEnd
+    .match(spaces, scopeIdentifierSpan.end(inDeclaration))
+    .skipTo(scopeIdentifierEnd);
 
-varTypeEnd
-  .select({
-    event: 1,
-    integer: 2,
-    parameter: 3,
-    // real: 4,
-    realtime: 5,
-    reg: 6,
-    supply0: 7,
-    supply1: 8,
-    time: 9,
-    // tri: 10,
-    triand: 11,
-    trior: 12,
-    trireg: 13,
-    tri0: 14,
-    tri1: 15,
-    wand: 16,
-    wire: 17,
-    wor: 18
-  }, p.invoke(p.code.store('type'), varSize))
-  .otherwise(p.error(3, 'Expected var type'));
+  // $var
 
-varSize
-  .match(spaces, varSize)
-  .otherwise(varSizeSpan.start(varSizeEnd));
+  varType
+    .match(spaces, varType)
+    .otherwise(varTypeEnd);
 
-varSizeEnd
-  .match(spaces, varSizeSpan.end(varId))
-  .skipTo(varSizeEnd);
+  varTypeEnd
+    .select({
+      event: 1,
+      integer: 2,
+      parameter: 3,
+      // real: 4,
+      realtime: 5,
+      reg: 6,
+      supply0: 7,
+      supply1: 8,
+      time: 9,
+      // tri: 10,
+      triand: 11,
+      trior: 12,
+      trireg: 13,
+      tri0: 14,
+      tri1: 15,
+      wand: 16,
+      wire: 17,
+      wor: 18
+    }, p.invoke(p.code.store('type'), varSize))
+    .otherwise(p.error(3, 'Expected var type'));
 
-varId
-  .match(spaces, varId)
-  .otherwise(varIdSpan.start(varIdEnd));
+  varSize
+    .match(spaces, varSize)
+    .otherwise(varSizeSpan.start(varSizeEnd));
 
-varIdEnd
-  .match(spaces, varIdSpan.end(varName))
-  .skipTo(varIdEnd);
+  varSizeEnd
+    .match(spaces, varSizeSpan.end(varId))
+    .skipTo(varSizeEnd);
 
-varName
-  .match(spaces, varName)
-  .otherwise(varNameSpan.start(varNameEnd));
+  varId
+    .match(spaces, varId)
+    .otherwise(varIdSpan.start(varIdEnd));
 
-varNameEnd
-  .match(spaces, varNameSpan.end(inDeclaration))
-  .skipTo(varNameEnd);
+  varIdEnd
+    .match(spaces, varIdSpan.end(varName))
+    .skipTo(varIdEnd);
 
-// $end
+  varName
+    .match(spaces, varName)
+    .otherwise(varNameSpan.start(varNameEnd));
 
-inDeclaration
-  .match('$end', commandSpan.end(declaration))
-  .skipTo(inDeclaration);
+  varNameEnd
+    .match(spaces, varNameSpan.end(inDeclaration))
+    .skipTo(varNameEnd);
 
-enddefinitions
-  .match('$end', commandSpan.end(simulation))
-  .skipTo(enddefinitions);
+  // $end
 
-simulation
-  .match([' ', '\n', '\t'], simulation)
-  .select(cmd('$dumpall $dumpoff $dumpon $dumpvars $comment'),
-    p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
-  .select(cmd('#'),
-    p.invoke(p.code.store('command'), timeSpan.start(simulationTime)))
-  .select(cmd('0 1 x X Z'),
-    p.invoke(p.code.store('command'), idSpan.start(simulationId)))
-  .select(cmd('b B r R'),
-    p.invoke(p.code.store('command'), vectorSpan.start(simulationVector)))
-  .otherwise(p.error(4, 'Expected simulation command'));
+  inDeclaration
+    .match('$end', commandSpan.end(declaration))
+    .skipTo(inDeclaration);
 
-inSimulation
-  .match('$end', commandSpan.end(simulation))
-  .skipTo(inSimulation);
+  enddefinitions
+    .match('$end', commandSpan.end(simulation))
+    .skipTo(enddefinitions);
 
-simulationTime
-  .match(spaces, timeSpan.end(simulation))
-  .skipTo(simulationTime);
+  simulation
+    .match([' ', '\n', '\t'], simulation)
+    .select(cmd('$dumpall $dumpoff $dumpon $dumpvars $comment'),
+      p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
+    .select(cmd('#'),
+      p.invoke(p.code.store('command'), timeSpan.start(simulationTime)))
+    .select(cmd('0 1 x X Z'),
+      p.invoke(p.code.store('command'), idSpan.start(simulationId)))
+    .select(cmd('b B r R'),
+      p.invoke(p.code.store('command'), vectorSpan.start(simulationVector)))
+    .otherwise(p.error(4, 'Expected simulation command'));
 
-simulationVector
-  .match(spaces, vectorSpan.end(idSpan.start(simulationId)))
-  .skipTo(simulationVector);
+  inSimulation
+    .match('$end', commandSpan.end(simulation))
+    .skipTo(inSimulation);
 
-simulationId
-  .match(spaces, idSpan.end(simulation))
-  .skipTo(simulationId);
+  simulationTime
+    .match(spaces, timeSpan.end(simulation))
+    .skipTo(simulationTime);
 
-// Build
+  simulationVector
+    .match(spaces, vectorSpan.end(idSpan.start(simulationId)))
+    .skipTo(simulationVector);
 
-const artifacts = p.build(declaration);
+  simulationId
+    .match(spaces, idSpan.end(simulation))
+    .skipTo(simulationId);
 
-fs.writeFileSync(prj + '.h', artifacts.header);
-// fs.writeFileSync('verilog_preprocessor.bc', artifacts.bitcode);
-fs.writeFileSync(prj + '.c', artifacts.c);
+  const artifacts = p.build(declaration);
 
-const dot = new llparseDot.Dot();
+  fs.writeFileSync(prj + '.h', artifacts.header);
+  // fs.writeFileSync('verilog_preprocessor.bc', artifacts.bitcode);
+  fs.writeFileSync(prj + '.c', artifacts.c);
 
-fs.writeFileSync(prj + '.dot', dot.build(declaration));
+  // const dot = new llparseDot.Dot();
+  // fs.writeFileSync(prj + '.dot', dot.build(declaration));
+
+  cb();
+};
+
+generate(gyp);
 
 /* eslint camelcase: 0 */
