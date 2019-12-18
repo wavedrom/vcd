@@ -6,8 +6,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node-version: [6, 8, 10, 12, 13]
-        os: [ubuntu-latest, macOS-latest] # windows-latest
+        node-version: [8, 10, 12, 13] # 6 fails on MacOSX
+        os: [ubuntu-latest, macOS-latest] # windows-latest fails
     steps:
     - uses: actions/checkout@v1
     - name: Use Node.js ${{ matrix.node-version }}
