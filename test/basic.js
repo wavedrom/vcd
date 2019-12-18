@@ -19,8 +19,9 @@ describe('basic', () => {
     const inst = lib.parser();
     expect(inst.write(Buffer.from(' foo bar ???'))).to.eq(true);
     expect(inst.info).to.deep.eq({
-      path: [],
-      status: 'declaration'
+      stack: [{}],
+      status: 'declaration',
+      wires: {}
     });
     done();
   });
@@ -31,8 +32,9 @@ describe('basic', () => {
       ' \n $comment some text $end $comment more text $end ???'
     ))).to.eq(true);
     expect(inst.info).to.deep.eq({
-      path: [],
-      status: 'declaration'
+      stack: [{}],
+      status: 'declaration',
+      wires: {}
     });
     done();
   });
@@ -51,7 +53,7 @@ $timescale   1ns $end
       $var wire 64 {u counter [63:0] $end
     $upscope $end
     $scope module fruit $end
-      $var wire 4 {u point [3:0] $end
+      $var wire 4 u) point [3:0] $end
     $upscope $end
   $upscope $end
 
@@ -78,10 +80,43 @@ b0000000000001111 {u
 )).to.eq(true);
 
     expect(inst.info).to.deep.eq({
-      path: [],
-      status: 'simulation'
+      status: 'simulation',
+      varId: 'u)',
+      wires: {
+        top: {
+          clock: '"}G',
+          fruit: {
+            point: 'u)'
+          },
+          leaf: {
+            counter: '{u'
+          }
+        }
+      },
+      stack: [{
+        top: {
+          clock: '"}G',
+          fruit: {
+            point: 'u)'
+          },
+          leaf: {
+            counter: '{u'
+          }
+        }
+      },
+      {
+        clock: '"}G',
+        fruit: {
+          point: 'u)'
+        },
+        leaf: {
+          counter: '{u'
+        }
+      },
+      {
+        point: 'u)'
+      }]
     });
-
     done();
   });
 });
