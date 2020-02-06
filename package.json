@@ -12,6 +12,7 @@
     "*.c",
     "*.h",
     "lib",
+    "bin/build.js",
     "binding.gyp"
   ],
   "repository": {
