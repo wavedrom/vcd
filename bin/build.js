@@ -16,75 +16,88 @@ const gyp = cb => {
   })));
 };
 
+const objection = lut => arg => arg.split(/\s+/).reduce((res, key) => {
+  if (lut[key] === undefined) {
+    throw new Error(key);
+  }
+  res[key] = lut[key];
+  return res;
+}, {});
+
+const properties = {
+  command:      'i8',
+  type:         'i8',
+  size:         'i32',
+  time:         'i64', // current simulation time
+  trigger:      'ptr',
+  triee:        'ptr', // trigger event emitter
+  lifee:        'ptr', // life cycle event emmiter
+  info:         'ptr',
+  value:        'i64', // value of the signal on change event
+  mask:         'i64', // mask (x, z) of the signal on change event
+  tmpStr:       'ptr',
+  stackPointer: 'i32',
+  id:           'ptr',
+  napi_env:     'ptr'
+};
+
 const generate = cb => {
   // const llparseDot = require('llparse-dot');
 
   const prj = 'vcd_parser';
   const p = new llparse.LLParse(prj);
 
-  // Add custom uint8_t property to the state
-  p.property('i8', 'command');
-  p.property('i8', 'type');
-  p.property('i32', 'size');
-  p.property('i64', 'time');
-  p.property('ptr', 'trigger');
-  p.property('ptr', 'triee');
-  p.property('ptr', 'lifee');
-  p.property('ptr', 'info');
-  p.property('i64', 'value');
-  p.property('i64', 'mask');
-  p.property('ptr', 'tmpStr');
-  p.property('i32', 'stackPointer');
-  p.property('ptr', 'id');
-  p.property('ptr', 'napi_env');
+  Object.keys(properties).map(key => p.property(properties[key], key));
 
-  const scopeIdentifierSpan = p.span(p.code.span('scopeIdentifierSpan'));
-  const varSizeSpan = p.span(p.code.span('varSizeSpan'));
-  const varIdSpan = p.span(p.code.span('varIdSpan'));
-  const varNameSpan = p.span(p.code.span('varNameSpan'));
-  const idSpan = p.span(p.code.span('idSpan'));
-  const commandSpan = p.span(p.code.span('commandSpan'));
-  const timeSpan = p.span(p.code.span('timeSpan'));
-  const vectorSpan = p.span(p.code.span('vectorSpan'));
+  const {
+    scopeIdentifierSpan,
+    varSizeSpan, varIdSpan, varNameSpan,
+    idSpan,
+    commandSpan,
+    timeSpan,
+    vectorSpan
+  } = `
+    scopeIdentifierSpan
+    varSizeSpan varIdSpan varNameSpan
+    idSpan
+    commandSpan
+    timeSpan
+    vectorSpan
+  `
+    .trim().split(/\s+/)
+    .reduce((res, n) => Object.assign(res, {[n]: p.span(p.code.span(n))}), {});
 
-  const declaration = p.node('declaration');
+  const {
+    declaration,
+    scopeType, scopeTypeEnd,
+    scopeIdentifier, scopeIdentifierEnd,
+    varType, varTypeEnd,
+    varSize, varSizeEnd,
+    varId, varIdEnd,
+    varName, varNameEnd,
+    inDeclaration,
+    simulation,
+    inSimulation,
+    simulationTime, simulationVector, simulationId
+  } = `
+    declaration
+    scopeType scopeTypeEnd
+    scopeIdentifier scopeIdentifierEnd
+    varType varTypeEnd
+    varSize varSizeEnd
+    varId varIdEnd
+    varName varNameEnd
+    inDeclaration
+    simulation
+    inSimulation
+    simulationTime simulationVector simulationId
+  `
+    .trim().split(/\s+/)
+    .reduce((res, n) => Object.assign(res, {[n]: p.node(n)}), {});
 
-  const scopeType = p.node('scopeType');
-  const scopeTypeEnd = p.node('scopeTypeEnd');
-
-  const scopeIdentifier = p.node('scopeIdentifier');
-  const scopeIdentifierEnd = p.node('scopeIdentifierEnd');
-
-  const varType = p.node('varType');
-  const varTypeEnd = p.node('varTypeEnd');
-
-  const varSize = p.node('varSize');
-  const varSizeEnd = p.node('varSizeEnd');
-
-  const varId = p.node('varId');
-  const varIdEnd = p.node('varIdEnd');
-
-  const varName = p.node('varName');
-  const varNameEnd = p.node('varNameEnd');
-
-  const inDeclaration = p.node('inDeclaration');
   const enddefinitions = p.node('inDeclarationEnd');
-  const simulation = p.node('simulation');
-  const inSimulation = p.node('inSimulation');
-
-  const simulationTime = p.node('simulationTime');
-  const simulationVector = p.node('simulationVector');
-  const simulationId = p.node('simulationId');
 
   const spaces = [' ', '\n', '\r', '\t'];
-
-  const objection = lut => arg => arg.split(/\s+/).reduce((res, key) => {
-    if (lut[key] === undefined) {
-      throw new Error(key);
-    }
-    res[key] = lut[key];
-    return res;
-  }, {});
 
   const cmd = objection({
     $comment: 1,
