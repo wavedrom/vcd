@@ -114,22 +114,36 @@ int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
   napi_env env = state->napi_env;
   if (stringEq((state->trigger), p, endp)) {
-    napi_value undefined, eventName, eventPayload1, eventPayload2, return_val;
+    const uint8_t command = state->command;
+    uint64_t value = state->value;
+    uint64_t mask = state->mask;
+    if (command == 14) {
+      value = 0;
+      mask = 0;
+    } else
+    if (command == 15) {
+      value = 1;
+      mask = 0;
+    }
+    napi_value undefined, eventName, aTime, aCommand, aValue, aMask, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
     ASSERT(eventName, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &eventName))
-    ASSERT(eventPayload1, napi_create_int32(env, state->time, &eventPayload1))
-    ASSERT(eventPayload2, napi_create_int32(env, state->command, &eventPayload2))
-    napi_value* argv[] = { &eventName, &eventPayload1, &eventPayload2 };
-    ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 3, *argv, &return_val))
+    ASSERT(aTime, napi_create_int64(env, state->time, &aTime))
+    ASSERT(aCommand, napi_create_int32(env, command, &aCommand))
+    ASSERT(aValue, napi_create_bigint_uint64(env, value, &aValue))
+    ASSERT(aMask, napi_create_bigint_uint64(env, mask, &aMask))
+    napi_value* argv[] = {&eventName, &aTime, &aCommand, &aValue, &aMask};
+    ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 5, *argv, &return_val))
   }
   return 0;
 }
 
 int vectorSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+  state->value = strtoul((const char *)p, (char **)&endp, 2);
   return 0;
 }
 
 int timeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  state->time = strtol((const char *)p, (char **)&endp, 10);
+  state->time = strtoul((const char *)p, (char **)&endp, 10);
   return 0;
 }

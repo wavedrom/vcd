@@ -26,11 +26,13 @@ const generate = cb => {
   p.property('i8', 'command');
   p.property('i8', 'type');
   p.property('i32', 'size');
-  p.property('i32', 'time');
+  p.property('i64', 'time');
   p.property('ptr', 'trigger');
   p.property('ptr', 'triee');
   p.property('ptr', 'lifee');
   p.property('ptr', 'info');
+  p.property('i64', 'value');
+  p.property('i64', 'mask');
   p.property('ptr', 'tmpStr');
   p.property('i32', 'stackPointer');
   p.property('ptr', 'id');
