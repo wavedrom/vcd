@@ -139,7 +139,9 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
 }
 
 int vectorSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+  // TODO implement proper 4-state parser
   state->value = strtoul((const char *)p, (char **)&endp, 2);
+  state->mask = 0;
   return 0;
 }
 
