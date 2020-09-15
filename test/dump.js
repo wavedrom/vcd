@@ -25,6 +25,7 @@ describe('dump', () => {
       expect(dump).to.deep.eq([
         { id: '"}G', time: 100, cmd: 14, value: 0n, mask: 0n },
         { id: '"}G', time: 200, cmd: 15, value: 1n, mask: 0n },
+        { id: '{u', time: 200, cmd: 19, value: 0xf0f0f0f0f0f0f0f0n, mask: 0xff00ff00ff00ff00n },
         { id: '"}G', time: 300, cmd: 14, value: 0n, mask: 0n },
         { id: '{u', time: 300, cmd: 19, value: 0xf000000000000000n, mask: 0n },
         { id: '{u', time: 301, cmd: 19, value: 0x0f00000000000000n, mask: 0n },
@@ -69,6 +70,7 @@ $timescale   1ns $end
 0"}G
 #200
 1"}G
+bzzzzxxxx11110000zzzzxxxx11110000zzzzxxxx11110000zzzzxxxx11110000 {u
 #300
 0"}G
 b1111000000000000000000000000000000000000000000000000000000000000 {u

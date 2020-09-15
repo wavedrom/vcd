@@ -144,11 +144,11 @@ int onDigit(
   vcd_parser_t* state,
   const unsigned char* p,
   const unsigned char* endp,
-  int match
+  int value
 ) {
   state->value *= 2;
   state->mask *= 2;
-  switch (match) {
+  switch (value) {
     case 1: {
       state->value += 1;
       return 0;
