@@ -54,15 +54,13 @@ const generate = cb => {
     varSizeSpan, varIdSpan, varNameSpan,
     idSpan,
     commandSpan,
-    timeSpan,
-    vectorSpan
+    timeSpan
   } = `
     scopeIdentifierSpan
     varSizeSpan varIdSpan varNameSpan
     idSpan
     commandSpan
     timeSpan
-    vectorSpan
   `
     .trim().split(/\s+/)
     .reduce((res, n) => Object.assign(res, {[n]: p.span(p.code.span(n))}), {});
@@ -78,7 +76,9 @@ const generate = cb => {
     inDeclaration,
     simulation,
     inSimulation,
-    simulationTime, simulationVector, simulationId
+    simulationTime,
+    simulationVector, simulationVectorEnd,
+    simulationId
   } = `
     declaration
     scopeType scopeTypeEnd
@@ -90,7 +90,9 @@ const generate = cb => {
     inDeclaration
     simulation
     inSimulation
-    simulationTime simulationVector simulationId
+    simulationTime
+    simulationVector simulationVectorEnd
+    simulationId
   `
     .trim().split(/\s+/)
     .reduce((res, n) => Object.assign(res, {[n]: p.node(n)}), {});
@@ -220,7 +222,7 @@ const generate = cb => {
     .select(cmd('0 1 x X Z'),
       p.invoke(p.code.store('command'), idSpan.start(simulationId)))
     .select(cmd('b B r R'),
-      p.invoke(p.code.store('command'), vectorSpan.start(simulationVector)))
+      p.invoke(p.code.store('command'), simulationVector))
     .otherwise(p.error(4, 'Expected simulation command'));
 
   inSimulation
@@ -231,9 +233,22 @@ const generate = cb => {
     .match(spaces, timeSpan.end(simulation))
     .skipTo(simulationTime);
 
+  const onDigit = p.code.mulAdd('value', {base: 2, signed: false});
+
   simulationVector
-    .match(spaces, vectorSpan.end(idSpan.start(simulationId)))
-    .skipTo(simulationVector);
+    .select(
+      {0: 0, 1: 1, x: 2, z: 3},
+      p.invoke(
+        onDigit,
+        {1: p.error(1, 'Content-Length overflow')},
+        simulationVector
+      )
+    )
+    .otherwise(simulationVectorEnd);
+
+  simulationVectorEnd
+    .match(spaces, idSpan.start(simulationId))
+    .skipTo(simulationVectorEnd);
 
   simulationId
     .match(spaces, idSpan.end(simulation))

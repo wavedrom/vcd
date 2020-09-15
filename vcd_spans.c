@@ -125,6 +125,8 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
       value = 1;
       mask = 0;
     }
+    state->value = 0;
+    state->mask = 0;
     napi_value undefined, eventName, aTime, aCommand, aValue, aMask, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
     ASSERT(eventName, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &eventName))
@@ -138,10 +140,29 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
   return 0;
 }
 
-int vectorSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  // TODO implement proper 4-state parser
-  state->value = strtoul((const char *)p, (char **)&endp, 2);
-  state->mask = 0;
+int onDigit(
+  vcd_parser_t* state,
+  const unsigned char* p,
+  const unsigned char* endp,
+  int match
+) {
+  state->value *= 2;
+  state->mask *= 2;
+  switch (match) {
+    case 1: {
+      state->value += 1;
+      return 0;
+    }
+    case 2: {
+      state->mask += 1;
+      return 0;
+    }
+    case 3: {
+      state->value += 1;
+      state->mask += 1;
+      return 0;
+    }
+  }
   return 0;
 }
 
