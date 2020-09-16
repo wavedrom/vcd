@@ -116,10 +116,11 @@ int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 
 int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
   napi_env env = state->napi_env;
+  const int valueWords = (state->digitCount >> 6) + 1;
+  uint64_t* value = state->value;
+  uint64_t* mask = state->mask;
   if (stringEq((state->trigger), p, endp)) {
     const uint8_t command = state->command;
-    uint64_t* value = state->value;
-    uint64_t* mask = state->mask;
     if (command == 14) {
       value[0] = 0;
       mask[0] = 0;
@@ -128,7 +129,6 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
       value[0] = 1;
       mask[0] = 0;
     }
-    const int valueWords = (state->digitCount >> 6) + 1;
     napi_value undefined, eventName, aTime, aCommand, aValue, aMask, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
     ASSERT(eventName, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &eventName))
@@ -138,12 +138,12 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
     ASSERT(aMask, napi_create_bigint_words(env, 0, valueWords, mask, &aMask))
     napi_value* argv[] = {&eventName, &aTime, &aCommand, &aValue, &aMask};
     ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 5, *argv, &return_val))
-    for (int i = 0; i < valueWords; i++) {
-      value[i] = 0;
-      mask[i] = 0;
-    }
-    state->digitCount = 0;
   }
+  for (int i = 0; i < valueWords; i++) {
+    value[i] = 0;
+    mask[i] = 0;
+  }
+  state->digitCount = 0;
   return 0;
 }
 
