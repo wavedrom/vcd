@@ -25,6 +25,9 @@ int stringEq (
   const unsigned char* p,
   const unsigned char* endp
 ) {
+  if (gold[0] == 0) {
+    return 1;
+  }
   unsigned char* i;
   unsigned char* j;
   i = gold;
