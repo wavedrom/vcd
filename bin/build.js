@@ -233,12 +233,11 @@ const generate = cb => {
     .match(spaces, timeSpan.end(simulation))
     .skipTo(simulationTime);
 
-  // const onDigit = p.code.mulAdd('value', {base: 2, signed: false});
-
   simulationVector
     .select(
-      {0: 0, 1: 1, x: 2, z: 3},
+      {0: 0, 1: 1, x: 2, z: 3, X: 2, Z: 3},
       p.invoke(
+        // p.code.mulAdd('value', {base: 2, signed: false}),
         p.code.value('onDigit'),
         {1: p.error(1, 'Content-Length overflow')},
         simulationVector
