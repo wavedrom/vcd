@@ -144,25 +144,10 @@ int onDigit(
   vcd_parser_t* state,
   const unsigned char* p,
   const unsigned char* endp,
-  int value
+  int digit
 ) {
-  state->value *= 2;
-  state->mask *= 2;
-  switch (value) {
-    case 1: {
-      state->value += 1;
-      return 0;
-    }
-    case 2: {
-      state->mask += 1;
-      return 0;
-    }
-    case 3: {
-      state->value += 1;
-      state->mask += 1;
-      return 0;
-    }
-  }
+  state->value = (state->value << 1) + (digit & 1);
+  state->mask  = (state->mask  << 1) + ((digit >> 1) & 1);
   return 0;
 }
 
