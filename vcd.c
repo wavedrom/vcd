@@ -124,11 +124,16 @@ METHOD(init) {
 
   static char triggerString [4096] = "       ";
   static char tmpStr [4096] = "       ";
+  static uint64_t valueBuf [4096] = {};
+  static uint64_t maskBuf [4096] = {};
 
   state->trigger = triggerString;
   state->reason = "NO REASON";
   state->napi_env = env;
   state->tmpStr = tmpStr;
+  state->value = valueBuf;
+  state->mask = maskBuf;
+  state->digitCount = 0;
 
   napi_value status;
   ASSERT(status, napi_create_string_latin1(env, "declaration", NAPI_AUTO_LENGTH, &status))

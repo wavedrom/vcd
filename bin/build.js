@@ -33,8 +33,9 @@ const properties = {
   triee:        'ptr', // trigger event emitter
   lifee:        'ptr', // life cycle event emmiter
   info:         'ptr',
-  value:        'i64', // value of the signal on change event
-  mask:         'i64', // mask (x, z) of the signal on change event
+  value:        'ptr', // value of the signal on change event
+  mask:         'ptr', // mask (x, z) of the signal on change event
+  digitCount:   'i32',
   tmpStr:       'ptr',
   stackPointer: 'i32',
   id:           'ptr',
