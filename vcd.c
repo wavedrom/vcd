@@ -196,11 +196,22 @@ METHOD(setTrigger) {
   return res;
 }
 
+METHOD(getTime) {
+  ASSERT_ARGC(1)
+  struct vcd_parser_s *state;
+  ASSERT_EXTERNAL(args[0], state)
+
+  napi_value res;
+  ASSERT(res, napi_create_bigint_uint64(env, state->time, &res))
+  return res;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   DECLARE_NAPI_METHOD("init", init)
   DECLARE_NAPI_METHOD("done", done)
   DECLARE_NAPI_METHOD("execute", execute)
   DECLARE_NAPI_METHOD("setTrigger", setTrigger)
+  DECLARE_NAPI_METHOD("getTime", getTime)
   return exports;
 }
 

@@ -22,6 +22,7 @@ describe('dump', () => {
       );
 
     inst.on('finish', () => {
+      expect(inst.getTime()).to.eq(316n);
       expect(dump).to.deep.eq([
         { id: '"}G', time: 100, cmd: 14, value: 0n, mask: 0n },
         { id: '"}G', time: 200, cmd: 15, value: 1n, mask: 0n },
