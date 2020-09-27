@@ -152,11 +152,17 @@ out/vcd.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 
 
 .PHONY: all build watch dev start test pretest lint jestc copydist cleandist
-.PHONY: test
+.PHONY: test testonly
 
+
+watch:
+	npm run watch
 
 test:
 	npm run test
+
+testonly:
+	npm run testonly
 
 
 clean:

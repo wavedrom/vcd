@@ -5,6 +5,8 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "eslint bin lib && nyc -r=text -r=lcov mocha",
+    "testonly": "nyc -r=text -r=lcov mocha",
+    "watch": "mocha --watch",
     "install": "node bin/build.js",
     "prepare": "node bin/build.js"
   },
