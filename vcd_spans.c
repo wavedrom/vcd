@@ -122,13 +122,18 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
   snprintf(state->tmpStr2, 4096, "stack.%d.%s", state->stackPointer, state->tmpStr);
   new_object_path(state->tmpStr2);
 
+
+  // snprintf(state->tmpStr2, 4096, "stack.%d", state->stackPointer);
   state->stackPointer += 1;
 
-  snprintf(state->tmpStr2, 4096, "stack.%d", state->stackPointer);
-  new_object_path(state->tmpStr2);
+  snprintf(state->tmpStr, 4096, "stack.%d", state->stackPointer);
+
+
+  // snprintf(state->tmpStr2, 4096, "stack.%d", state->stackPointer);
+  // new_object_path(state->tmpStr2);
 
   // snprintf(state->tmpStr, 4096, "stack.%d", state->stackPointer+1); // load the dot-prop into string 2
-  // set_path_to_path(state->tmpStr2, state->tmpStr);
+  set_path_to_path(state->tmpStr, state->tmpStr2);
 
 #endif
   return 0;
