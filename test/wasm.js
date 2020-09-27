@@ -22,6 +22,10 @@ describe('basic', () => {
 
     console.log("test");
 
+    // wrapper.c.execute('hello world');
+
+    wrapper.execute();
+
     // console.log(wrapper.log());
 
 

@@ -21,7 +21,7 @@ vcd_spans.c \
 # the version here has a prepended underscore
 # all lines must have trailing comma
 EXPORT_STRING = \
-# "_somefn", \
+"_execute", \
 # "_int_sqrt", \
 # "_pass_write_fn", \
 # "_get_saved_node_count", \
