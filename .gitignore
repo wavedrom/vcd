@@ -1,8 +1,9 @@
-.nyc_output
-build
-coverage
-node_modules
+/.nyc_output
+/build
+/coverage
+/node_modules
 package-lock.json
 *.dot
-tmp
+/tmp
 vcd_parser.*
+/out
