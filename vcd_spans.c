@@ -11,6 +11,8 @@ typedef void* napi_env;
 #endif
 
 
+// #define LOGSPAN
+#define LOGSPAN printf("%s\n", __FUNCTION__);
 
 
 #define ASSERT(val, expr) \
@@ -62,6 +64,7 @@ int stringEq (
 }
 
 int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+  LOGSPAN;
   napi_env env = state->napi_env;
 
   if (state->command == 5) { // $upscope
@@ -87,6 +90,7 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+  LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
   // *(endp - 1) = 0; // FIXME NULL termination of ASCII string
@@ -104,6 +108,7 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
 }
 
 int varSizeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+  LOGSPAN;
   state->size = strtol((const char *)p, (char **)&endp, 10);
   return 0;
 }

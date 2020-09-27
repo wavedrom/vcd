@@ -88,33 +88,55 @@ int init(
 
 
 
-
-
-
-void execute(
+int32_t execute(
   const int context,
   externalJsMethodOne* f1,
   externalJsMethodTwo* f2,
   externalJsSetProperty* sfn,
   externalJsGetProperty* gfn,
-  char* chunk
+  char* p
   ) {
 
   // cout << "execute got " << p << "\n";
-  cout << "execute " << (int)sfn << " and got " << chunk << "\n";
+  cout << "execute " << (int)sfn << " and got " << p << "\n";
   bound_set_property = sfn;
   bound_get_property = gfn;
   externalOne = f1;
   externalTwo = f2;
 
-  set_property_int("foo", 10);
+  const size_t plen = strlen(p);
+
+  const int32_t error = vcd_parser_execute(state, p, p + plen);
+
+  return error;
+}
+
+
+
+// void execute(
+//   const int context,
+//   externalJsMethodOne* f1,
+//   externalJsMethodTwo* f2,
+//   externalJsSetProperty* sfn,
+//   externalJsGetProperty* gfn,
+//   char* chunk
+//   ) {
+
+//   // cout << "execute got " << p << "\n";
+//   cout << "execute " << (int)sfn << " and got " << chunk << "\n";
+//   bound_set_property = sfn;
+//   bound_get_property = gfn;
+//   externalOne = f1;
+//   externalTwo = f2;
+
+//   set_property_int("foo", 10);
   
 
-  int got = get_property("bar");
+//   int got = get_property("bar");
 
-  cout << "got " << got << " for bar\n";
+//   cout << "got " << got << " for bar\n";
 
-}
+// }
 
 int main(void) {
   cout << "main()\n";
