@@ -7,39 +7,13 @@ wasm: out/vcd.wasm
 WASM_MAIN = wasm_main.cpp
 
 HPP_FILES = \
-# csrc/wrapper.hpp \
+vcd_parser.h \
 
 
 CPP_FILES = \
-# csrc/wrapper.cpp \
-# lib/BehaviorTree.CPP/src/action_node.cpp \
-# lib/BehaviorTree.CPP/src/basic_types.cpp \
-# lib/BehaviorTree.CPP/src/behavior_tree.cpp \
-# lib/BehaviorTree.CPP/src/blackboard.cpp \
-# lib/BehaviorTree.CPP/src/bt_factory.cpp \
-# lib/BehaviorTree.CPP/src/decorator_node.cpp \
-# lib/BehaviorTree.CPP/src/condition_node.cpp \
-# lib/BehaviorTree.CPP/src/control_node.cpp \
-# lib/BehaviorTree.CPP/src/shared_library.cpp \
-# lib/BehaviorTree.CPP/src/tree_node.cpp \
-# lib/BehaviorTree.CPP/src/decorators/inverter_node.cpp \
-# lib/BehaviorTree.CPP/src/decorators/repeat_node.cpp \
-# lib/BehaviorTree.CPP/src/decorators/retry_node.cpp \
-# lib/BehaviorTree.CPP/src/decorators/subtree_node.cpp \
-# lib/BehaviorTree.CPP/src/decorators/delay_node.cpp \
-# lib/BehaviorTree.CPP/src/controls/if_then_else_node.cpp \
-# lib/BehaviorTree.CPP/src/controls/fallback_node.cpp \
-# lib/BehaviorTree.CPP/src/controls/parallel_node.cpp \
-# lib/BehaviorTree.CPP/src/controls/reactive_sequence.cpp \
-# lib/BehaviorTree.CPP/src/controls/reactive_fallback.cpp \
-# lib/BehaviorTree.CPP/src/controls/sequence_node.cpp \
-# lib/BehaviorTree.CPP/src/controls/sequence_star_node.cpp \
-# lib/BehaviorTree.CPP/src/controls/switch_node.cpp \
-# lib/BehaviorTree.CPP/src/controls/while_do_else_node.cpp \
-# lib/BehaviorTree.CPP/src/loggers/bt_cout_logger.cpp \
-# lib/BehaviorTree.CPP/src/loggers/bt_file_logger.cpp \
-# lib/BehaviorTree.CPP/src/private/tinyxml2.cpp \
-# lib/BehaviorTree.CPP/src/xml_parsing.cpp \
+vcd_parser.c \
+vcd_spans.c \
+
 
 
 # this is a list of all C functions we want to publish to javascript
@@ -81,7 +55,7 @@ CLANG_WARN_FLAGS = \
 
 
 CLANG_OTHER_FLAGS = \
--DBT_NO_COROUTINES \
+-DVCDWASM \
 
 
 
@@ -106,7 +80,7 @@ out/vcd.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 	-s ALLOW_TABLE_GROWTH=1 \
 	-s EXPORTED_FUNCTIONS='[$(EXPORT_STRING) "_main"]' \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "addOnPostRun", "addFunction", "setValue", "getValue"]' \
-	'-std=c++2a' $(CLANG_O_FLAG) $(CLANG_WARN_FLAGS) $(CLANG_OTHER_FLAGS)
+	$(CLANG_O_FLAG) $(CLANG_WARN_FLAGS) $(CLANG_OTHER_FLAGS)
 
 
 .PHONY: patchlib patchlib1 patchlib2

@@ -4,7 +4,8 @@
   "description": "Value Change Dump (VCD) parser",
   "main": "lib/index.js",
   "scripts": {
-    "test": "eslint bin lib && nyc -r=text -r=lcov mocha",
+    "testlint": "eslint bin lib && nyc -r=text -r=lcov mocha",
+    "test": "nyc -r=text -r=lcov mocha",
     "testonly": "nyc -r=text -r=lcov mocha",
     "watch": "mocha --watch",
     "install": "node bin/build.js",
