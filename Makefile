@@ -24,6 +24,8 @@ vcd_spans.c \
 EXPORT_STRING = \
 "_execute", \
 "_init", \
+"_setTrigger", \
+"_getTime", \
 
 # warning and error flags
 CLANG_WARN_FLAGS = \

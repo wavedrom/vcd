@@ -7,8 +7,8 @@ using namespace std;
 
 
 /// Typedef used as part of c->js call
-typedef void externalJsMethodOne(const int sz);
-typedef void externalJsMethodTwo(const char*, const uint64_t time, const uint8_t command, const int dnc0, const int dnc1);
+typedef void externalJsMethodZero(const int sz);
+typedef void externalJsMethodOne (const char*, const uint64_t time, const uint8_t command, const int dnc0, const int dnc1);
 
 typedef int  externalJsGetProperty(const char* name, const size_t len);
 typedef void externalJsSetProperty(const char* name, const size_t len, const int type, const int v0, const int v1);
@@ -16,8 +16,8 @@ typedef void externalJsSetProperty(const char* name, const size_t len, const int
 
 
 /// function pointer for c->js
-static externalJsMethodOne* externalOne = 0;
-static externalJsMethodTwo* externalTwo = 0;
+static externalJsMethodZero* externalZero = 0;
+static externalJsMethodOne*  externalOne  = 0;
 static externalJsSetProperty* bound_set_property = 0;
 static externalJsGetProperty* bound_get_property = 0;
 
@@ -40,8 +40,8 @@ extern "C" {
 
 // returns context
 int init(
-  externalJsMethodOne* f1,
-  externalJsMethodTwo* f2,
+  externalJsMethodZero* f0,
+  externalJsMethodOne*  f1,
   externalJsSetProperty* sfn,
   externalJsGetProperty* gfn
   ) {
@@ -57,11 +57,11 @@ int init(
 
   bound_set_property = sfn;
   bound_get_property = gfn;
-  externalOne = f1;
-  externalTwo = f2;
+  externalZero = f0;
+  externalOne  = f1;
 
-  state->lifee = (void*) externalOne;
-  state->triee = (void*) externalTwo;
+  state->lifee = (void*) externalZero;
+  state->triee = (void*) externalOne;
 
   static char triggerString [4096] = "       ";
   static char tmpStr [4096] = "       ";
@@ -90,19 +90,19 @@ int init(
 
 int32_t execute(
   const int context,
-  externalJsMethodOne* f1,
-  externalJsMethodTwo* f2,
+  externalJsMethodZero* f0,
+  externalJsMethodOne*  f1,
   externalJsSetProperty* sfn,
   externalJsGetProperty* gfn,
   char* p
   ) {
 
   // cout << "execute got " << p << "\n";
-  cout << "execute " << (int)sfn << " and got " << p << "\n";
+  // cout << "execute " << (int)sfn << " and got " << p << "\n";
   bound_set_property = sfn;
   bound_get_property = gfn;
-  externalOne = f1;
-  externalTwo = f2;
+  externalZero = f0;
+  externalOne  = f1;
 
   const size_t plen = strlen(p);
 
@@ -111,12 +111,21 @@ int32_t execute(
   return error;
 }
 
+int setTrigger(const int context, char* triggerString) {
+  cout << "setTrigger() got " << triggerString << "\n";
+  return 0;
+}
+
+int getTime(const int context) {
+  return state->time;
+}
+
 
 
 // void execute(
 //   const int context,
+//   externalJsMethodZero* f0,
 //   externalJsMethodOne* f1,
-//   externalJsMethodTwo* f2,
 //   externalJsSetProperty* sfn,
 //   externalJsGetProperty* gfn,
 //   char* chunk
@@ -126,8 +135,8 @@ int32_t execute(
 //   cout << "execute " << (int)sfn << " and got " << chunk << "\n";
 //   bound_set_property = sfn;
 //   bound_get_property = gfn;
+//   externalZero = f0;
 //   externalOne = f1;
-//   externalTwo = f2;
 
 //   set_property_int("foo", 10);
   

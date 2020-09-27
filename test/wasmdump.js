@@ -1,17 +1,22 @@
 'use strict';
 
 const expect = require('chai').expect;
-// const lib = require('../lib/index.js');
-const lib = require('../lib/wrapper.js')();
+const lib = require('../lib/index.js');
 
 describe('dump', () => {
 
+  let inst;
+
+  // return a promise, and mocha will wait until it resolves
   before(() => {
-    return lib.start();
+    const fn = async () => {
+      inst = await lib.wasmparser();
+    };
+    return fn();
   });
 
   it('simple', done => {
-    const inst = lib.parser();
+    
     const dump = [];
     ['"}G', '{u', 'u)'] // array of all signal ids
       .map(id =>
