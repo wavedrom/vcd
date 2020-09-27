@@ -7,7 +7,7 @@ using namespace std;
 
 
 /// Typedef used as part of c->js call
-typedef void externalJsMethodZero(const int sz);
+typedef void externalJsMethodZero(const char* name, const size_t len);
 typedef void externalJsMethodOne (const char*, const uint64_t time, const uint8_t command, const int dnc0, const int dnc1);
 
 typedef int  externalJsGetProperty(const char* name, const size_t len);
@@ -20,6 +20,9 @@ static externalJsMethodZero* externalZero = 0;
 static externalJsMethodOne*  externalOne  = 0;
 static externalJsSetProperty* bound_set_property = 0;
 static externalJsGetProperty* bound_get_property = 0;
+static struct vcd_parser_s* state;
+
+extern "C" {
 
 void set_property_int(const char* name, const int value) {
   bound_set_property(name, strlen(name), 0, value, 0);
@@ -29,14 +32,20 @@ void set_property_string(const char* name, const char* value) {
   bound_set_property(name, strlen(name), 1, (int)value, strlen(value));
 }
 
-int get_property(const char* name) {
+void set_path_string(const char* name, const char* value) {
+  bound_set_property(name, strlen(name), 2, (int)value, strlen(value));
+}
+
+int get_property_int(const char* name) {
   return bound_get_property(name, strlen(name));
 }
 
+void emit_lifee(const char* name) {
+  externalZero(name, strlen(name));
+}
 
-static struct vcd_parser_s* state;
 
-extern "C" {
+
 
 // returns context
 int init(
@@ -141,7 +150,7 @@ int getTime(const int context) {
 //   set_property_int("foo", 10);
   
 
-//   int got = get_property("bar");
+//   int got = get_property_int("bar");
 
 //   cout << "got " << got << " for bar\n";
 

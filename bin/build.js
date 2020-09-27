@@ -37,6 +37,7 @@ const properties = {
   mask:         'ptr', // mask (x, z) of the signal on change event
   digitCount:   'i32',
   tmpStr:       'ptr',
+  tmpStr2:      'ptr',
   stackPointer: 'i32',
   id:           'ptr',
   napi_env:     'ptr'
