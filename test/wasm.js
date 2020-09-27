@@ -22,10 +22,20 @@ describe('basic', () => {
 
     console.log("test");
 
+    const wires = {};
+    const info = {stack: [wires], wires: wires};
+
+
+    wrapper.init({},{},info);
+
+    console.log(info);
+
+
     // wrapper.c.execute('hello world');
 
     wrapper.execute();
 
+    expect(info.foo).to.equal(10);
     // console.log(wrapper.log());
 
 

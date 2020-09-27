@@ -8,6 +8,7 @@ WASM_MAIN = wasm_main.cpp
 
 HPP_FILES = \
 vcd_parser.h \
+wasm_main.hpp \
 
 
 CPP_FILES = \
@@ -22,27 +23,7 @@ vcd_spans.c \
 # all lines must have trailing comma
 EXPORT_STRING = \
 "_execute", \
-# "_int_sqrt", \
-# "_pass_write_fn", \
-# "_get_saved_node_count", \
-# "_get_saved_node_name", \
-# "_get_saved_node_id", \
-# "_get_child_node_count", \
-# "_get_child_node_id", \
-# "_register_action_node", \
-# "_register_condition_node", \
-# "_unregister_builder", \
-# "_parse_xml", \
-# "_lt", \
-# "_ltd", \
-# "_reset_trackers", \
-# "_reset_factory", \
-# "_reset_all", \
-
-# Functions used in debugging
-# "_callBoundJs", \
-# "_debug_example", \
-
+"_init", \
 
 # warning and error flags
 CLANG_WARN_FLAGS = \
