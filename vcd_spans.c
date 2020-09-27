@@ -119,22 +119,18 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
   ASSERT(top, napi_set_element(env, stack, state->stackPointer, obj))
 #else
   strcopy(p, endp, state->tmpStr); // load the value into temp string 1
+
+  // set stack[sp].`tmpStr` to {}
   snprintf(state->tmpStr2, 4096, "stack.%d.%s", state->stackPointer, state->tmpStr);
   new_object_path(state->tmpStr2);
 
-
-  // snprintf(state->tmpStr2, 4096, "stack.%d", state->stackPointer);
+  // bump
   state->stackPointer += 1;
 
+  // set stack[sp+1] to the same object as stack[sp].`tmpStr`
   snprintf(state->tmpStr, 4096, "stack.%d", state->stackPointer);
 
-
-  // snprintf(state->tmpStr2, 4096, "stack.%d", state->stackPointer);
-  // new_object_path(state->tmpStr2);
-
-  // snprintf(state->tmpStr, 4096, "stack.%d", state->stackPointer+1); // load the dot-prop into string 2
   set_path_to_path(state->tmpStr, state->tmpStr2);
-
 #endif
   return 0;
 }
