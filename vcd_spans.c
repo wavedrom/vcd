@@ -71,6 +71,7 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
   napi_env env = state->napi_env;
 
   if (state->command == 5) { // $upscope
+    printf("commandSpan sp goes from %d to %d\n", state->stackPointer, state->stackPointer-1);
     state->stackPointer -= 1;
     return 0;
   }
@@ -89,6 +90,7 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
     set_property_string("status", "simulation");
     emit_lifee("$enddefinitions");
 #endif
+    printf("commandSpan END\n");
     return 0;
   }
 
@@ -99,22 +101,35 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
   LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
-  // *(endp - 1) = 0; // FIXME NULL termination of ASCII string
   strcopy(p, endp, state->tmpStr);
   napi_value obj, stack, top;
   ASSERT(obj, napi_create_object(env, &obj))
   ASSERT(state->info, napi_get_named_property(env, state->info, "stack", &stack))
-  ASSERT(top, napi_get_element(env, stack, state->stackPointer, &top))
+
+  // get the top of the stack in top
   printf("Got stack %d\n", state->stackPointer);
+  ASSERT(top, napi_get_element(env, stack, state->stackPointer, &top))
+
+  // set top.prop to new object
+  printf("Set top of stack[%d].%s to {}\n", state->stackPointer, (char*)state->tmpStr);
   ASSERT(top, napi_set_named_property(env, top, state->tmpStr, obj))
-  printf("Set ? to %s\n", (char*)state->tmpStr);
+
+  printf("Set top+1 of stack to top %d, %d\n", state->stackPointer, state->stackPointer+1);
   state->stackPointer += 1;
   ASSERT(top, napi_set_element(env, stack, state->stackPointer, obj))
 #else
-  state->stackPointer += 1;
   strcopy(p, endp, state->tmpStr); // load the value into temp string 1
-  snprintf(state->tmpStr2, 4096, "stack.%d\n", state->stackPointer); // load the dot-prop into string 2
-  set_path_string(state->tmpStr2, state->tmpStr);
+  snprintf(state->tmpStr2, 4096, "stack.%d.%s", state->stackPointer, state->tmpStr);
+  new_object_path(state->tmpStr2);
+
+  state->stackPointer += 1;
+
+  snprintf(state->tmpStr2, 4096, "stack.%d", state->stackPointer);
+  new_object_path(state->tmpStr2);
+
+  // snprintf(state->tmpStr, 4096, "stack.%d", state->stackPointer+1); // load the dot-prop into string 2
+  // set_path_to_path(state->tmpStr2, state->tmpStr);
+
 #endif
   return 0;
 }
@@ -151,8 +166,11 @@ int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
   ASSERT(state->info, napi_get_named_property(env, state->info, "varId", &varId))
   ASSERT(state->info, napi_set_named_property(env, top, state->tmpStr, varId))
 #else
-  // char *varIdString = 
-  set_property_string("varId", state->tmpStr);
+  strcopy(p, endp, state->tmpStr);
+  // set
+  //  info.stack[sp].`tmpStr` = info.varId
+  snprintf(state->tmpStr2, 4096, "stack.%d.%s", state->stackPointer, state->tmpStr);
+  set_path_to_path(state->tmpStr2, "varId");
 #endif
   return 0;
 }

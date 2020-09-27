@@ -36,6 +36,14 @@ void set_path_string(const char* name, const char* value) {
   bound_set_property(name, strlen(name), 2, (int)value, strlen(value));
 }
 
+void set_path_to_path(const char* name, const char* value) {
+  bound_set_property(name, strlen(name), 3, (int)value, strlen(value));
+}
+
+void new_object_path(const char* name) {
+  bound_set_property(name, strlen(name), 4, 0, 0);
+}
+
 int get_property_int(const char* name) {
   return bound_get_property(name, strlen(name));
 }
@@ -121,7 +129,7 @@ int32_t execute(
 }
 
 int setTrigger(const int context, char* triggerString) {
-  cout << "setTrigger() got " << triggerString << "\n";
+  // cout << "setTrigger() got " << triggerString << "\n";
   return 0;
 }
 
