@@ -21,6 +21,7 @@ describe('dump', () => {
     ['"}G', '{u', 'u)'] // array of all signal ids
       .map(id =>
         inst.change.on(id, (time, cmd, value, mask) => {
+          console.log(time, cmd, value, mask);
           dump.push({
             id,
             time,

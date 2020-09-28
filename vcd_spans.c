@@ -200,8 +200,8 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
       value[0] = 1;
       mask[0] = 0;
     }
-    printf("valueWords %d %d %d\n", valueWords, (int)command, state->digitCount);
-    printf("\ntriee %lx\n", *value);
+    // printf("valueWords %d %d %d\n", valueWords, (int)command, state->digitCount);
+    // printf("\ntriee %llx\n", *value);
 #ifndef VCDWASM
     napi_value undefined, eventName, aTime, aCommand, aValue, aMask, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
