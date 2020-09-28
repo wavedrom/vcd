@@ -2,8 +2,8 @@
 /build
 /coverage
 /node_modules
-package-lock.json
+/package-lock.json
 *.dot
 /tmp
-vcd_parser.*
+/vcd_parser.*
 /out
