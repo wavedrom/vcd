@@ -124,6 +124,7 @@ METHOD(init) {
 
   static char triggerString [4096] = "       ";
   static char tmpStr [4096] = "       ";
+  static char tmpStr2 [4096] = "       ";
   static uint64_t valueBuf [4096] = {};
   static uint64_t maskBuf [4096] = {};
 
@@ -131,6 +132,7 @@ METHOD(init) {
   state->reason = "NO REASON";
   state->napi_env = env;
   state->tmpStr = tmpStr;
+  state->tmpStr2 = tmpStr2;
   state->value = valueBuf;
   state->mask = maskBuf;
   state->digitCount = 0;

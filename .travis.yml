@@ -1,0 +1,27 @@
+notifications:
+  email: false
+
+language: node_js
+node_js:
+  - 14
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker run -dit --name emscripten --user "$(id -u):$(id -g)" -v $(pwd):/src trzeci/emscripten:1.39.11-upstream bash
+
+before_script:
+  - docker exec -it emscripten make wasm
+
+# script:
+#   - ls -la
+#   - ls -la out
+#   - whoami
+
+
+
+# - docker run -dit --name dtest -v $(pwd):/src esromneb/simple-clang bash
+# - docker exec -it dtest make -C src test

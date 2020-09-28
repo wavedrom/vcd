@@ -1,7 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "vcd_parser.h"
+
+#ifndef VCDWASM
 #include <node_api.h>
+#else
+#include "wasm_main.hpp"
+#endif
+
+#ifdef VCDWASM
+typedef void* napi_env;
+#endif
+
+
+// #define LOGSPAN
+// #define LOGSPAN printf("%s\n", __FUNCTION__);
+
 
 #define ASSERT(val, expr) \
     if (expr != napi_ok) { \
@@ -60,6 +75,7 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
   }
 
   if (state->command == 8) { // $enddefinitions
+#ifndef VCDWASM
     napi_value status, undefined, eventName, eventPayload, return_val;
     ASSERT(status, napi_create_string_latin1(env, "simulation", NAPI_AUTO_LENGTH, &status))
     ASSERT(state->info, napi_set_named_property(env, state->info, "status", status))
@@ -68,6 +84,10 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
     // ASSERT(eventPayload, napi_create_string_latin1(env, "payload", NAPI_AUTO_LENGTH, &eventPayload))
     napi_value* argv[] = { &eventName }; // , &eventPayload };
     ASSERT(state->lifee, napi_call_function(env, undefined, state->lifee, 1, *argv, &return_val))
+#else
+    set_property_string("status", "simulation");
+    emit_lifee("$enddefinitions");
+#endif
     return 0;
   }
 
@@ -75,17 +95,36 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+#ifndef VCDWASM
   napi_env env = state->napi_env;
-  // *(endp - 1) = 0; // FIXME NULL termination of ASCII string
   strcopy(p, endp, state->tmpStr);
-  napi_value name, obj, stack, top;
-  ASSERT(name, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &name))
+  napi_value obj, stack, top;
   ASSERT(obj, napi_create_object(env, &obj))
   ASSERT(state->info, napi_get_named_property(env, state->info, "stack", &stack))
+
+  // get the top of the stack in top
   ASSERT(top, napi_get_element(env, stack, state->stackPointer, &top))
+
+  // set top.prop to new object
   ASSERT(top, napi_set_named_property(env, top, state->tmpStr, obj))
+
   state->stackPointer += 1;
   ASSERT(top, napi_set_element(env, stack, state->stackPointer, obj))
+#else
+  strcopy(p, endp, state->tmpStr); // load the value into temp string 1
+
+  // set stack[sp].`tmpStr` to {}
+  snprintf(state->tmpStr2, 4096, "stack.%d.%s", state->stackPointer, state->tmpStr);
+  new_object_path(state->tmpStr2);
+
+  // bump
+  state->stackPointer += 1;
+
+  // set stack[sp+1] to the same object as stack[sp].`tmpStr`
+  snprintf(state->tmpStr, 4096, "stack.%d", state->stackPointer);
+
+  set_path_to_path(state->tmpStr, state->tmpStr2);
+#endif
   return 0;
 }
 
@@ -95,14 +134,20 @@ int varSizeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int varIdSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+#ifndef VCDWASM
   napi_env env = state->napi_env;
   napi_value varId;
   ASSERT(varId, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &varId))
   ASSERT(state->info, napi_set_named_property(env, state->info, "varId", varId))
+#else
+  strcopy(p, endp, state->tmpStr);
+  set_property_string("varId", state->tmpStr);
+#endif
   return 0;
 }
 
 int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+#ifndef VCDWASM
   napi_env env = state->napi_env;
   // *(endp - 1) = 0; // FIXME NULL termination of ASCII string
   strcopy(p, endp, state->tmpStr);
@@ -111,11 +156,21 @@ int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
   ASSERT(top, napi_get_element(env, stack, state->stackPointer, &top))
   ASSERT(state->info, napi_get_named_property(env, state->info, "varId", &varId))
   ASSERT(state->info, napi_set_named_property(env, top, state->tmpStr, varId))
+#else
+  strcopy(p, endp, state->tmpStr);
+  // set
+  //  info.stack[sp].`tmpStr` = info.varId
+  snprintf(state->tmpStr2, 4096, "stack.%d.%s", state->stackPointer, state->tmpStr);
+  set_path_to_path(state->tmpStr2, "varId");
+#endif
   return 0;
 }
 
 int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+#ifndef VCDWASM
   napi_env env = state->napi_env;
+#endif
+
   const int valueWords = (state->digitCount >> 6) + 1;
   uint64_t* value = state->value;
   uint64_t* mask = state->mask;
@@ -129,6 +184,7 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
       value[0] = 1;
       mask[0] = 0;
     }
+#ifndef VCDWASM
     napi_value undefined, eventName, aTime, aCommand, aValue, aMask, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
     ASSERT(eventName, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &eventName))
@@ -138,6 +194,11 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
     ASSERT(aMask, napi_create_bigint_words(env, 0, valueWords, mask, &aMask))
     napi_value* argv[] = {&eventName, &aTime, &aCommand, &aValue, &aMask};
     ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 5, *argv, &return_val))
+
+#else
+    strcopy(p, endp, state->tmpStr);
+    emit_triee(state->tmpStr, state->time, command, valueWords, value, mask);
+#endif
   }
   for (int i = 0; i < valueWords; i++) {
     value[i] = 0;

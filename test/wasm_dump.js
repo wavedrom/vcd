@@ -3,10 +3,20 @@
 const expect = require('chai').expect;
 const lib = require('../lib/index.js');
 
-describe('dump', () => {
+describe('wasm dump', () => {
 
-  it('simple', done => {
-    const inst = lib.parser();
+  let inst;
+
+  // return a promise, and mocha will wait until it resolves
+  before(() => {
+    const fn = async () => {
+      inst = await lib.wasmparser();
+    };
+    return fn();
+  });
+
+  it('simple wasm', done => {
+    
     const dump = [];
     ['"}G', '{u', 'u)'] // array of all signal ids
       .map(id =>
@@ -71,7 +81,11 @@ $timescale   1ns $end
 0"}G
 #200
 1"}G
-bzzzzxxxx11110000ZZZZXXXX11110000zzzzxxxx11110000zzzzxxxx11110000 {u
+bzzzzxxxx11110000ZZZZXXXX11110000zzzzxxx`);
+
+// break in the middle of the number scan
+
+     inst.write(                       `x11110000zzzzxxxx11110000 {u
 #300
 0"}G
 b1111000000000000000000000000000000000000000000000000000000000000 {u
