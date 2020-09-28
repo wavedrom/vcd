@@ -71,11 +71,7 @@ $timescale   1ns $end
 0"}G
 #200
 1"}G
-bzzzzxxxx11110000ZZZZXXXX11110000zzzzxxx`);
-
-// break in the middle of the number scan
-
-     inst.write(                       `x11110000zzzzxxxx11110000 {u
+bzzzzxxxx11110000ZZZZXXXX11110000zzzzxxxx11110000zzzzxxxx11110000 {u
 #300
 0"}G
 b1111000000000000000000000000000000000000000000000000000000000000 {u
