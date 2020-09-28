@@ -70,7 +70,6 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
   napi_env env = state->napi_env;
 
   if (state->command == 5) { // $upscope
-    // printf("commandSpan sp goes from %d to %d\n", state->stackPointer, state->stackPointer-1);
     state->stackPointer -= 1;
     return 0;
   }
@@ -89,7 +88,6 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
     set_property_string("status", "simulation");
     emit_lifee("$enddefinitions");
 #endif
-    // printf("commandSpan END\n");
     return 0;
   }
 
@@ -105,14 +103,11 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
   ASSERT(state->info, napi_get_named_property(env, state->info, "stack", &stack))
 
   // get the top of the stack in top
-  // printf("Got stack %d\n", state->stackPointer);
   ASSERT(top, napi_get_element(env, stack, state->stackPointer, &top))
 
   // set top.prop to new object
-  // printf("Set top of stack[%d].%s to {}\n", state->stackPointer, (char*)state->tmpStr);
   ASSERT(top, napi_set_named_property(env, top, state->tmpStr, obj))
 
-  // printf("Set top+1 of stack to top %d, %d\n", state->stackPointer, state->stackPointer+1);
   state->stackPointer += 1;
   ASSERT(top, napi_set_element(env, stack, state->stackPointer, obj))
 #else
@@ -178,7 +173,6 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
 
   const int valueWords = (state->digitCount >> 6) + 1;
   uint64_t* value = state->value;
-  // value = &foo;
   uint64_t* mask = state->mask;
   if (stringEq((state->trigger), p, endp)) {
     const uint8_t command = state->command;
@@ -190,8 +184,6 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
       value[0] = 1;
       mask[0] = 0;
     }
-    // printf("valueWords %d %d %d\n", valueWords, (int)command, state->digitCount);
-    // printf("\ntriee %llx\n", *value);
 #ifndef VCDWASM
     napi_value undefined, eventName, aTime, aCommand, aValue, aMask, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
@@ -200,14 +192,10 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
     ASSERT(aCommand, napi_create_int32(env, command, &aCommand))
     ASSERT(aValue, napi_create_bigint_words(env, 0, valueWords, value, &aValue))
     ASSERT(aMask, napi_create_bigint_words(env, 0, valueWords, mask, &aMask))
-
-
     napi_value* argv[] = {&eventName, &aTime, &aCommand, &aValue, &aMask};
     ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 5, *argv, &return_val))
 
 #else
-
-    // printf("\ntriee %lx\n", *value);
     strcopy(p, endp, state->tmpStr);
     emit_triee(state->tmpStr, state->time, command, valueWords, value, mask);
 #endif
@@ -242,6 +230,7 @@ int onDigit(
     maskCout = mask[i] >> 63;
     mask[i]  = (mask[i] << 1) + maskCin;
     maskCin = maskCout;
+
   }
   state->digitCount += 1;
   return 0;
