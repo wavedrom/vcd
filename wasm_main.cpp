@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <iostream>
 #include "vcd_parser.h"
 
@@ -8,7 +9,8 @@ using namespace std;
 
 /// Typedef used as part of c->js call
 typedef void externalJsMethodZero(const char* name, const size_t len);
-typedef void externalJsMethodOne (const char*, const uint64_t time, const uint8_t command, const int dnc0, const int dnc1);
+// typedef void externalJsMethodOne (const char* name, const size_t len, const uint64_t time, const uint8_t command, const int valueWords, const int aValue, const int aMask);
+typedef void externalJsMethodOne (const char* name, const size_t len, const int time, const int command, const int valueWords, const int aValue, const int aMask);
 
 typedef int  externalJsGetProperty(const char* name, const size_t len);
 typedef void externalJsSetProperty(const char* name, const size_t len, const int type, const int v0, const int v1);
@@ -52,6 +54,29 @@ void emit_lifee(const char* name) {
   externalZero(name, strlen(name));
 }
 
+void emit_triee(const char* name, const int64_t time, const int command, const int valueWords, uint64_t* aValue, uint64_t* aMask) {
+
+  // return;
+  // externalOne(
+  //   "hi"
+  //   ,2
+  //   ,time
+  //   ,command
+  //   ,0
+  //   ,0
+  //   ,0
+  // );
+  externalOne(
+    name,
+    strlen(name),
+    time,
+    command,
+    valueWords,
+    (int)aValue,
+    (int)aMask
+    );
+}
+
 
 
 
@@ -77,11 +102,12 @@ int init(
   externalZero = f0;
   externalOne  = f1;
 
-  state->lifee = (void*) externalZero;
-  state->triee = (void*) externalOne;
+  state->lifee = 0;
+  state->triee = 0;
 
   static char triggerString [4096] = "       ";
   static char tmpStr [4096] = "       ";
+  static char tmpStr2 [4096] = "       ";
   static uint64_t valueBuf [4096] = {};
   static uint64_t maskBuf [4096] = {};
 
@@ -89,6 +115,7 @@ int init(
   state->reason = "NO REASON";
   state->napi_env = 0;
   state->tmpStr = tmpStr;
+  state->tmpStr2 = tmpStr2;
   state->value = valueBuf;
   state->mask = maskBuf;
   state->digitCount = 0;
@@ -129,6 +156,8 @@ int32_t execute(
 }
 
 int setTrigger(const int context, char* triggerString) {
+  state->trigger = malloc(strlen(triggerString));
+  strcpy((char*)state->trigger, triggerString);
   // cout << "setTrigger() got " << triggerString << "\n";
   return 0;
 }
@@ -165,7 +194,7 @@ int getTime(const int context) {
 // }
 
 int main(void) {
-  cout << "main()\n";
+  // cout << "main()\n";
   return 0;
 }
 

@@ -98,7 +98,7 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  LOGSPAN;
+  // LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
   strcopy(p, endp, state->tmpStr);
@@ -107,14 +107,14 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
   ASSERT(state->info, napi_get_named_property(env, state->info, "stack", &stack))
 
   // get the top of the stack in top
-  printf("Got stack %d\n", state->stackPointer);
+  // printf("Got stack %d\n", state->stackPointer);
   ASSERT(top, napi_get_element(env, stack, state->stackPointer, &top))
 
   // set top.prop to new object
-  printf("Set top of stack[%d].%s to {}\n", state->stackPointer, (char*)state->tmpStr);
+  // printf("Set top of stack[%d].%s to {}\n", state->stackPointer, (char*)state->tmpStr);
   ASSERT(top, napi_set_named_property(env, top, state->tmpStr, obj))
 
-  printf("Set top+1 of stack to top %d, %d\n", state->stackPointer, state->stackPointer+1);
+  // printf("Set top+1 of stack to top %d, %d\n", state->stackPointer, state->stackPointer+1);
   state->stackPointer += 1;
   ASSERT(top, napi_set_element(env, stack, state->stackPointer, obj))
 #else
@@ -136,13 +136,13 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
 }
 
 int varSizeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  LOGSPAN;
+  // LOGSPAN;
   state->size = strtol((const char *)p, (char **)&endp, 10);
   return 0;
 }
 
 int varIdSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  LOGSPAN;
+  // LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
   napi_value varId;
@@ -156,7 +156,7 @@ int varIdSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* 
 }
 
 int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  LOGSPAN;
+  // LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
   // *(endp - 1) = 0; // FIXME NULL termination of ASCII string
@@ -177,10 +177,18 @@ int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+  LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
+#endif
+
+  // uint64_t foo = 0x123456789abcdef0;
+
+  // printf(" '%s' ", state->trigger);
+
   const int valueWords = (state->digitCount >> 6) + 1;
   uint64_t* value = state->value;
+  // value = &foo;
   uint64_t* mask = state->mask;
   if (stringEq((state->trigger), p, endp)) {
     const uint8_t command = state->command;
@@ -192,6 +200,9 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
       value[0] = 1;
       mask[0] = 0;
     }
+    printf("valueWords %d %d %d\n", valueWords, (int)command, state->digitCount);
+    printf("\ntriee %lx\n", *value);
+#ifndef VCDWASM
     napi_value undefined, eventName, aTime, aCommand, aValue, aMask, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
     ASSERT(eventName, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &eventName))
@@ -199,15 +210,23 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
     ASSERT(aCommand, napi_create_int32(env, command, &aCommand))
     ASSERT(aValue, napi_create_bigint_words(env, 0, valueWords, value, &aValue))
     ASSERT(aMask, napi_create_bigint_words(env, 0, valueWords, mask, &aMask))
+
+
     napi_value* argv[] = {&eventName, &aTime, &aCommand, &aValue, &aMask};
     ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 5, *argv, &return_val))
+
+#else
+
+    // printf("\ntriee %lx\n", *value);
+    strcopy(p, endp, state->tmpStr);
+    emit_triee(state->tmpStr, state->time, command, valueWords, value, mask);
+#endif
   }
   for (int i = 0; i < valueWords; i++) {
     value[i] = 0;
     mask[i] = 0;
   }
   state->digitCount = 0;
-#endif
   return 0;
 }
 
@@ -217,7 +236,6 @@ int onDigit(
   const unsigned char* endp,
   int digit
 ) {
-#ifndef VCDWASM
   unsigned int valueCin = (digit & 1);
   unsigned int maskCin = ((digit >> 1) & 1);
   unsigned int valueCout;
@@ -234,10 +252,14 @@ int onDigit(
     maskCout = mask[i] >> 63;
     mask[i]  = (mask[i] << 1) + maskCin;
     maskCin = maskCout;
-
+    // unsigned char* c = p;
+    // while(c != endp) {
+    //   puts(c); c++;
+    // }
   }
+  char c = *p;
+  printf("%c", c);
   state->digitCount += 1;
-#endif
   return 0;
 }
 
