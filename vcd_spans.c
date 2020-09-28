@@ -15,7 +15,7 @@ typedef void* napi_env;
 
 
 // #define LOGSPAN
-#define LOGSPAN printf("%s\n", __FUNCTION__);
+// #define LOGSPAN printf("%s\n", __FUNCTION__);
 
 
 #define ASSERT(val, expr) \
@@ -67,11 +67,10 @@ int stringEq (
 }
 
 int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  LOGSPAN;
   napi_env env = state->napi_env;
 
   if (state->command == 5) { // $upscope
-    printf("commandSpan sp goes from %d to %d\n", state->stackPointer, state->stackPointer-1);
+    // printf("commandSpan sp goes from %d to %d\n", state->stackPointer, state->stackPointer-1);
     state->stackPointer -= 1;
     return 0;
   }
@@ -90,7 +89,7 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
     set_property_string("status", "simulation");
     emit_lifee("$enddefinitions");
 #endif
-    printf("commandSpan END\n");
+    // printf("commandSpan END\n");
     return 0;
   }
 
@@ -98,7 +97,6 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  // LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
   strcopy(p, endp, state->tmpStr);
@@ -136,13 +134,11 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
 }
 
 int varSizeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  // LOGSPAN;
   state->size = strtol((const char *)p, (char **)&endp, 10);
   return 0;
 }
 
 int varIdSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  // LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
   napi_value varId;
@@ -156,7 +152,6 @@ int varIdSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* 
 }
 
 int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  // LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
   // *(endp - 1) = 0; // FIXME NULL termination of ASCII string
@@ -177,14 +172,9 @@ int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  LOGSPAN;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
 #endif
-
-  // uint64_t foo = 0x123456789abcdef0;
-
-  // printf(" '%s' ", state->trigger);
 
   const int valueWords = (state->digitCount >> 6) + 1;
   uint64_t* value = state->value;
@@ -252,13 +242,7 @@ int onDigit(
     maskCout = mask[i] >> 63;
     mask[i]  = (mask[i] << 1) + maskCin;
     maskCin = maskCout;
-    // unsigned char* c = p;
-    // while(c != endp) {
-    //   puts(c); c++;
-    // }
   }
-  char c = *p;
-  printf("%c", c);
   state->digitCount += 1;
   return 0;
 }

@@ -162,7 +162,7 @@ int setTrigger(const int context, char* triggerString) {
   return 0;
 }
 
-int getTime(const int context) {
+uint64_t getTime(const int context) {
   return state->time;
 }
 
