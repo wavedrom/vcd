@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const lib = require('../lib/index.js');
 
-describe('basic', () => {
+describe('wasm basic', () => {
 
   it('typeof vcd', done => {
     expect(lib.wasmparser).to.be.an('function');

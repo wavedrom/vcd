@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const lib = require('../lib/index.js');
 
-describe('dump', () => {
+describe('wasm dump', () => {
 
   let inst;
 
