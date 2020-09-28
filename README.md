@@ -9,6 +9,7 @@ Install
 
 ```
 npm i vcd-stream
+make wasm
 ```
 
 Require
