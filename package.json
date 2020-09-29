@@ -11,6 +11,8 @@
     "prepare": "node bin/build.js"
   },
   "files": [
+    "out/vcd.js",
+    "out/vcd.wasm",
     "*.c",
     "*.h",
     "lib",
