@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <iostream>
 #include "vcd_parser.h"
 
@@ -87,7 +88,7 @@ int init(
   externalJsSetProperty* sfn,
   externalJsGetProperty* gfn
   ) {
-  
+
 
   state = (struct vcd_parser_s*) malloc(sizeof *state);
 
@@ -119,6 +120,7 @@ int init(
   state->value = valueBuf;
   state->mask = maskBuf;
   state->digitCount = 0;
+  state->time = UINT64_MAX;
 
   set_property_string("status", "declaration");
 
@@ -185,7 +187,7 @@ uint64_t getTime(const int context) {
 //   externalOne = f1;
 
 //   set_property_int("foo", 10);
-  
+
 
 //   int got = get_property_int("bar");
 

@@ -1,5 +1,6 @@
 #define NAPI_VERSION 1
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include "vcd_parser.h"
 #include <node_api.h>
@@ -135,6 +136,7 @@ METHOD(init) {
   state->tmpStr2 = tmpStr2;
   state->value = valueBuf;
   state->mask = maskBuf;
+  state->time = UINT64_MAX;
   state->digitCount = 0;
 
   napi_value status;
