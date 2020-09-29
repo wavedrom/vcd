@@ -74,6 +74,30 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
     return 0;
   }
 
+  if (
+    (state->command == 1) || // $comment
+    (state->command == 2) || // $date
+    (state->command == 4) || // $timescale
+    (state->command == 7)    // $version
+  ) {
+    char* key;
+    switch(state->command) {
+    case 1: key = "comment"; break;
+    case 2: key = "date"; break;
+    case 4: key = "timescale"; break;
+    case 7: key = "version"; break;
+    }
+#ifndef VCDWASM
+    napi_value val;
+    ASSERT(val, napi_create_string_latin1(env, (char*)p, (endp - p - 4), &val))
+    ASSERT(state->info, napi_set_named_property(env, state->info, key, val))
+#else
+    strcopy(p, endp - 3, state->tmpStr);
+    set_property_string(key, state->tmpStr);
+#endif
+    return 0;
+  }
+
   if (state->command == 8) { // $enddefinitions
 #ifndef VCDWASM
     napi_value status, undefined, eventName, eventPayload, return_val;
