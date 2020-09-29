@@ -16,7 +16,7 @@ describe('wasm dump', () => {
   });
 
   it('simple wasm', done => {
-    
+
     const dump = [];
     ['"}G', '{u', 'u)'] // array of all signal ids
       .map(id =>
@@ -54,9 +54,8 @@ describe('wasm dump', () => {
         { id: '{u', time: 313, cmd: 19, value: 0x0000000000000f00n, mask: 0n },
         { id: '{u', time: 314, cmd: 19, value: 0x00000000000000f0n, mask: 0n },
         { id: '{u', time: 315, cmd: 19, value: 0x000000000000000fn, mask: 0n },
-        { id: '"}G', time: 316, cmd: 15, value: 1n, mask: 0n },
-      ])
-      // console.log(dump);
+        { id: '"}G', time: 316, cmd: 15, value: 1n, mask: 0n }
+      ]);
       done();
     });
 
@@ -83,9 +82,9 @@ $timescale   1ns $end
 1"}G
 bzzzzxxxx11110000ZZZZXXXX11110000zzzzxxx`);
 
-// break in the middle of the number scan
+    // break in the middle of the number scan
 
-     inst.write(                       `x11110000zzzzxxxx11110000 {u
+    inst.write(                       `x11110000zzzzxxxx11110000 {u
 #300
 0"}G
 b1111000000000000000000000000000000000000000000000000000000000000 {u

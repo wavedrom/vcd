@@ -4,7 +4,7 @@
   "description": "Value Change Dump (VCD) parser",
   "main": "lib/index.js",
   "scripts": {
-    "test": "eslint bin lib && nyc -r=text -r=lcov mocha",
+    "test": "eslint bin lib test && nyc -r=text -r=lcov mocha",
     "testonly": "nyc -r=text -r=lcov mocha",
     "watch": "mocha --watch",
     "install": "node bin/build.js",
@@ -48,6 +48,7 @@
     "nyc": "^15.1.0"
   },
   "eslintConfig": {
-    "extends": "@drom/eslint-config/eslint4/node8"
+    "extends": "@drom/eslint-config/eslint4/node8",
+    "parserOptions": { "ecmaVersion": 2020 }
   }
 }

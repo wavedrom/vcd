@@ -44,8 +44,8 @@ describe('dump', () => {
         { id: '{u', time: 313, cmd: 19, value: 0x0000000000000f00n, mask: 0n },
         { id: '{u', time: 314, cmd: 19, value: 0x00000000000000f0n, mask: 0n },
         { id: '{u', time: 315, cmd: 19, value: 0x000000000000000fn, mask: 0n },
-        { id: '"}G', time: 316, cmd: 15, value: 1n, mask: 0n },
-      ])
+        { id: '"}G', time: 316, cmd: 15, value: 1n, mask: 0n }
+      ]);
       // console.log(dump);
       done();
     });

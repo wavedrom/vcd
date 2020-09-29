@@ -58,7 +58,7 @@ $timescale   1ns $end
 
   $enddefinitions $end
 `
-)).to.eq(true);
+    )).to.eq(true);
 
     expect(inst.write(`
 
@@ -76,7 +76,7 @@ b0000000011110000 {u
 #303
 b0000000000001111 {u
 `
-)).to.eq(true);
+    )).to.eq(true);
 
     expect(inst.info).to.deep.eq({
       status: 'simulation',
