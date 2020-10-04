@@ -11,9 +11,10 @@ issue, email, twitter, or any other method with the owners of this repository be
 4) do not include changes that are not related to the issue at hand
 5) follow the same coding style with regards to spaces, semicolons, variable naming etc
 6) add tests
-4) make sure you install all dependencies by running `npm i`
-5) make sure you tested your code by running `npm test`
-6) when you think the code is ready for review a pull request should be created
+7) make sure you install all dependencies by running `npm i`
+8) make sure you tested your code by running `npm test`
+9) if changing C/C++ code, you must verify that NAPI and WASM both pass tests
+10) when you think the code is ready for review a pull request should be created
 
 ## Code of Conduct
 
