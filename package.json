@@ -49,6 +49,8 @@
   },
   "eslintConfig": {
     "extends": "@drom/eslint-config/eslint4/node8",
-    "parserOptions": { "ecmaVersion": 2020 }
+    "parserOptions": {
+      "ecmaVersion": 2020
+    }
   }
 }
