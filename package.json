@@ -35,7 +35,7 @@
   "dependencies": {
     "async": "^3.1.0",
     "bindings": "^1.5.0",
-    "dot-prop": "^5.3.0",
+    "dot-prop": "^6.0.1",
     "fs-extra": "^9.0.1",
     "llparse": "^7.0.1"
   },
