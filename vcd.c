@@ -1,4 +1,4 @@
-#define NAPI_VERSION 1
+#define NAPI_VERSION 6
 #include <stdio.h>
 #include <limits.h>
 #include <stdlib.h>
