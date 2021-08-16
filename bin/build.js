@@ -216,8 +216,8 @@ const generate = cb => {
     .skipTo(enddefinitions);
 
   simulation
-    .match([' ', '\n', '\t'], simulation)
-    .select(cmd('$dumpall $dumpoff $dumpon $dumpvars $comment'),
+    .match([' ', '\n', '\t', '$dumpvars', '$end'], simulation)
+    .select(cmd('$dumpall $dumpoff $dumpon $comment'),
       p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
     .select(cmd('#'),
       p.invoke(p.code.store('command'), timeSpan.start(simulationTime)))

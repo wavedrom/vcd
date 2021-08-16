@@ -120,7 +120,7 @@ int init(
   state->value = valueBuf;
   state->mask = maskBuf;
   state->digitCount = 0;
-  state->time = UINT64_MAX;
+  state->time = 0; // UINT64_MAX;
 
   set_property_string("status", "declaration");
 
