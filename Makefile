@@ -29,6 +29,9 @@ EXPORT_STRING = \
 
 # warning and error flags
 CLANG_WARN_FLAGS = \
+-flto \
+-fno-exceptions \
+-Wl,--lto-O3 \
 -Wall -Wextra \
 -Wno-ignored-qualifiers \
 -Wundef \
@@ -42,7 +45,7 @@ CLANG_OTHER_FLAGS = \
 
 
 
-CLANG_O_FLAG = '-O3'
+CLANG_O_FLAG = '-Oz'
 
 ifdef NOOPT
   CLANG_O_FLAG = ' '
@@ -55,16 +58,23 @@ endif
 # works however slows down
 #-s DISABLE_EXCEPTION_CATCHING=0 \
 
+
 out/vcd.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 	mkdir -p out
-	emcc $(WASM_MAIN) $(CPP_FILES) -s WASM=1 -o out/vcd.html \
-	-s DISABLE_EXCEPTION_CATCHING=0 \
+	emcc \
+	$(WASM_MAIN) \
+	$(CPP_FILES) \
+	-o out/vcd.html \
+	-s DISABLE_EXCEPTION_CATCHING=1 \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s ALLOW_TABLE_GROWTH=1 \
+	-s MODULARIZE=1 \
+	-s EXPORT_NAME=createVCD \
 	-s EXPORTED_FUNCTIONS='[$(EXPORT_STRING) "_main"]' \
-	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "addOnPostRun", "addFunction", "setValue", "getValue"]' \
+	-s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "addOnPostRun", "addFunction", "setValue", "getValue"]' \
 	$(CLANG_O_FLAG) $(CLANG_WARN_FLAGS) $(CLANG_OTHER_FLAGS)
 
+# -s WASM=0 \
 
 .PHONY: patchlib patchlib1 patchlib2
 
@@ -127,4 +137,3 @@ prepare:
 
 clean:
 	rm -rf out/*
-
