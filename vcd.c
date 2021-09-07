@@ -136,7 +136,7 @@ METHOD(init) {
   state->tmpStr2 = tmpStr2;
   state->value = valueBuf;
   state->mask = maskBuf;
-  state->time = 0; // UINT64_MAX;
+  state->time = INT64_MAX;
   state->digitCount = 0;
 
   napi_value status;
@@ -206,7 +206,7 @@ METHOD(getTime) {
   ASSERT_EXTERNAL(args[0], state)
 
   napi_value res;
-  ASSERT(res, napi_create_bigint_uint64(env, state->time, &res))
+  ASSERT(res, napi_create_bigint_int64(env, state->time, &res))
   return res;
 }
 

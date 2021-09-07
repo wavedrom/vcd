@@ -263,11 +263,11 @@ int onDigit(
 
 int timeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
   int64_t time = strtoul((const char *)p, (char **)&endp, 10);
-  if (state->time == UINT64_MAX) {
+  if (state->time == INT64_MAX) {
 #ifndef VCDWASM
     napi_env env = state->napi_env;
     napi_value val;
-    ASSERT(val, napi_create_int32(env, time, &val))
+    ASSERT(val, napi_create_int64(env, time, &val))
     ASSERT(state->info, napi_set_named_property(env, state->info, "t0", val))
 #else
     set_property_int("t0", time);

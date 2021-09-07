@@ -10,8 +10,18 @@ using namespace std;
 
 /// Typedef used as part of c->js call
 typedef void externalJsMethodZero(const char* name, const size_t len);
+
 // typedef void externalJsMethodOne (const char* name, const size_t len, const uint64_t time, const uint8_t command, const int valueWords, const int aValue, const int aMask);
-typedef void externalJsMethodOne (const char* name, const size_t len, const int time, const int command, const int valueWords, const int aValue, const int aMask);
+
+typedef void externalJsMethodOne (
+  const char* name,
+  const size_t len,
+  const int64_t time,
+  const int command,
+  const int valueWords,
+  const int aValue,
+  const int aMask
+);
 
 typedef int  externalJsGetProperty(const char* name, const size_t len);
 typedef void externalJsSetProperty(const char* name, const size_t len, const int type, const int v0, const int v1);
@@ -55,7 +65,14 @@ void emit_lifee(const char* name) {
   externalZero(name, strlen(name));
 }
 
-void emit_triee(const char* name, const int64_t time, const int command, const int valueWords, uint64_t* aValue, uint64_t* aMask) {
+void emit_triee(
+  const char* name,
+  const int64_t time,
+  const int command,
+  const int valueWords,
+  uint64_t* aValue,
+  uint64_t* aMask
+) {
 
   // return;
   // externalOne(
@@ -120,7 +137,7 @@ int init(
   state->value = valueBuf;
   state->mask = maskBuf;
   state->digitCount = 0;
-  state->time = 0; // UINT64_MAX;
+  state->time = INT64_MAX;
 
   set_property_string("status", "declaration");
 
@@ -164,7 +181,7 @@ int setTrigger(const int context, char* triggerString) {
   return 0;
 }
 
-uint64_t getTime(const int context) {
+int64_t getTime(const int context) {
   return state->time;
 }
 

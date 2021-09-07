@@ -47,11 +47,11 @@
     "chai": "^4.3.4",
     "dot-prop": "^6.0.1",
     "eslint": "^7.31.0",
-    "http-server": "^0.12.3",
+    "http-server": "^13.0.1",
     "llparse-dot": "^1.0.1",
-    "mocha": "^9.0.3",
+    "mocha": "^9.1.1",
     "nyc": "^15.1.0",
-    "terser": "^5.7.1",
+    "terser": "^5.7.2",
     "watchify": "^4.0.0"
   },
   "eslintConfig": {

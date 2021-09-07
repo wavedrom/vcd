@@ -117,8 +117,15 @@ const generate = cb => {
     $dumpon: 11,
     $dumpvars: 12,
     '#': 13,
-    '0': 14, '1': 15, x: 16, X: 17, Z: 18,
-    b: 19, B: 20, r: 21, R: 22
+    '0': 14, '1': 15,
+    x: 16, X: 17,
+    z: 18, Z: 19,
+    u: 20, U: 21, // VHDL states
+    w: 22, W: 23,
+    l: 24, L: 25,
+    h: 26, H: 27,
+    '-': 28,
+    b: 30, B: 31, r: 32, R: 33
   });
 
   declaration
@@ -221,7 +228,7 @@ const generate = cb => {
       p.invoke(p.code.store('command'), commandSpan.start(inSimulation)))
     .select(cmd('#'),
       p.invoke(p.code.store('command'), timeSpan.start(simulationTime)))
-    .select(cmd('0 1 x X Z'),
+    .select(cmd('0 1 x X z Z u U w W l L h H -'),
       p.invoke(p.code.store('command'), idSpan.start(simulationId)))
     .select(cmd('b B r R'),
       p.invoke(p.code.store('command'), simulationVector))
@@ -237,7 +244,17 @@ const generate = cb => {
 
   simulationVector
     .select(
-      {0: 0, 1: 1, x: 2, z: 3, X: 2, Z: 3},
+      {
+        0: 0,
+        1: 1,
+        x: 2, X: 2,
+        z: 3, Z: 3,
+        u: 3, U: 3, // VHDL states
+        w: 3, W: 3,
+        l: 3, L: 3,
+        h: 3, H: 3,
+        '-': 3
+      },
       p.invoke(
         // p.code.mulAdd('value', {base: 2, signed: false}),
         p.code.value('onDigit'),

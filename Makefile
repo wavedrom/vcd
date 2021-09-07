@@ -3,19 +3,15 @@
 all: wasm
 wasm: out/vcd.wasm
 
-
 WASM_MAIN = wasm_main.cpp
 
 HPP_FILES = \
 vcd_parser.h \
 wasm_main.hpp \
 
-
 CPP_FILES = \
 vcd_parser.c \
 vcd_spans.c \
-
-
 
 # this is a list of all C functions we want to publish to javascript
 # In the main cpp file, each of these is wrapped in extern "C" {}
@@ -39,11 +35,8 @@ CLANG_WARN_FLAGS = \
 -Wshadow \
 # -Wconversion
 
-
 CLANG_OTHER_FLAGS = \
 -DVCDWASM \
-
-
 
 CLANG_O_FLAG = '-Oz'
 
@@ -58,7 +51,6 @@ endif
 # works however slows down
 #-s DISABLE_EXCEPTION_CATCHING=0 \
 
-
 out/vcd.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 	mkdir -p out
 	emcc \
@@ -66,7 +58,10 @@ out/vcd.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 	$(CPP_FILES) \
 	-o out/vcd.html \
 	-s DISABLE_EXCEPTION_CATCHING=1 \
+	-s WASM_BIGINT \
 	-s ALLOW_MEMORY_GROWTH=1 \
+	-s INITIAL_MEMORY=1GB \
+	-s MAXIMUM_MEMORY=2GB \
 	-s ALLOW_TABLE_GROWTH=1 \
 	-s MODULARIZE=1 \
 	-s EXPORT_NAME=createVCD \
@@ -99,10 +94,6 @@ out/vcd.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 # 	@echo "$(PTSRC1) already patched, skipping..."
 # endif
 
-
-
-
-
 # PTSRC2=lib/BehaviorTree.CPP/src/tree_node.cpp
 # PTPAT2=patch/tree_node.patch
 # PAPPLIED2 := $(shell patch -R -p0 -s -f --dry-run $(PTSRC2) < $(PTPAT2) 1>&2 2> /dev/null > /dev/null; echo $$?)
@@ -115,12 +106,8 @@ out/vcd.wasm: $(WASM_MAIN) $(CPP_FILES) $(HPP_FILES) Makefile
 # 	@echo "$(PTSRC2) already patched, skipping..."
 # endif
 
-
-
-
 .PHONY: all build watch dev start test pretest lint jestc copydist cleandist prepare
 .PHONY: test testonly
-
 
 watch:
 	npm run watch
@@ -133,7 +120,6 @@ testonly:
 
 prepare:
 	npm run prepare
-
 
 clean:
 	rm -rf out/*
