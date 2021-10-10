@@ -1,9 +1,9 @@
-name: Linux
+name: MacOS
 on: [push, pull_request]
 jobs:
   test:
-    name: Linux ${{ matrix.node-version }}
-    runs-on: ubuntu-latest
+    name: MacOS ${{ matrix.node-version }}
+    runs-on: macOS-latest
     strategy:
       matrix:
         node-version: [12, 14, 16]
