@@ -4,16 +4,10 @@ const expect = require('chai').expect;
 const lib = require('../lib/index.js');
 
 describe('wasm events', () => {
-  let inst;
-  // return a promise, and mocha will wait until it resolves
-  before(() => {
-    const fn = async () => {
-      inst = await lib.wasmparser();
-    };
-    return fn();
-  });
 
-  it('$enddefinitions', done => {
+  it('$enddefinitions', async function () {
+    const mod = await lib.createVCD();
+    const inst = await lib.webVcdParser(mod);
 
     inst.on('$enddefinitions', () => {
       expect(inst.info).to.deep.eq({
@@ -77,8 +71,6 @@ $timescale   1ns $end
   $enddefinitions $end
 `
     )).to.eq(true);
-
-    done();
   });
 
 

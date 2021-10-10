@@ -1,5 +1,5 @@
 #pragma once
-
+#include <stdint.h>
 
 void set_property_int(const char* name, const int value);
 void set_property_string(const char* name, const char* value);

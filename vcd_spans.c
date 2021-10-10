@@ -120,9 +120,10 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+
+  strcopy(p, endp, state->tmpStr); // load the value into temp string 1
 #ifndef VCDWASM
   napi_env env = state->napi_env;
-  strcopy(p, endp, state->tmpStr);
   napi_value obj, stack, top;
   ASSERT(obj, napi_create_object(env, &obj))
   ASSERT(state->info, napi_get_named_property(env, state->info, "stack", &stack))
@@ -136,8 +137,6 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
   state->stackPointer += 1;
   ASSERT(top, napi_set_element(env, stack, state->stackPointer, obj))
 #else
-  strcopy(p, endp, state->tmpStr); // load the value into temp string 1
-
   // set stack[sp].`tmpStr` to {}
   snprintf(state->tmpStr2, 4096, "stack.%d.%s", state->stackPointer, state->tmpStr);
   new_object_path(state->tmpStr2);
