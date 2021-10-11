@@ -4,6 +4,8 @@
   "description": "Value Change Dump (VCD) parser",
   "main": "lib/index.js",
   "scripts": {
+    "mocha_napi": "mocha test/napi_*",
+    "mocha_wasm": "mocha test/wasm_*",
     "nyc_mocha_napi": "nyc -r=text -r=lcov mocha test/napi_* ",
     "nyc_mocha_wasm": "nyc -r=text -r=lcov mocha test/wasm_*",
     "nyc_mocha": "nyc -r=text -r=lcov mocha",
