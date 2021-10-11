@@ -14,4 +14,4 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm i
-    - run: npm run nyc_mocha_wasm
+    - run: npm run nyc_mocha_napi
