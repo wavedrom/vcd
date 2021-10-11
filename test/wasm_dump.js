@@ -1,13 +1,14 @@
 'use strict';
 
 const expect = require('chai').expect;
-const lib = require('../lib/index.js');
+const createVCD = require('../out/vcd.js');
+const webVcdParser = require('../lib/web-vcd-parser.js');
 
 describe('wasm dump', function () {
 
   it('simple wasm', function (done) {
-    lib.createVCD().then(function (mod) {
-      lib.webVcdParser(mod).then(function (inst) {
+    createVCD().then(function (mod) {
+      webVcdParser(mod).then(function (inst) {
         const dump = [];
         ['"}G', '{u', 'u)'] // array of all signal ids
           .map(id =>

@@ -12,7 +12,6 @@
     "watch": "mocha --watch",
     "build.web": "browserify ./lib/vcd-web.js | terser --compress -o demo/vcd-web.min.js",
     "watch.web": "watchify ./lib/vcd-web.js -o demo/vcd-web.min.js -v",
-    "install": "node bin/build.js",
     "prepare": "node bin/build.js"
   },
   "files": [

@@ -1,13 +1,14 @@
 'use strict';
 
 const expect = require('chai').expect;
-const lib = require('../lib/index.js');
+const createVCD = require('../out/vcd.js');
+const webVcdParser = require('../lib/web-vcd-parser.js');
 
 describe('wasm events', () => {
 
   it('$enddefinitions', async function () {
-    const mod = await lib.createVCD();
-    const inst = await lib.webVcdParser(mod);
+    const mod = await createVCD();
+    const inst = await webVcdParser(mod);
 
     inst.on('$enddefinitions', () => {
       expect(inst.info).to.deep.eq({

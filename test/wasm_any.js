@@ -1,13 +1,14 @@
 'use strict';
 
 const expect = require('chai').expect;
-const lib = require('../lib/index.js');
+const createVCD = require('../out/vcd.js');
+const webVcdParser = require('../lib/web-vcd-parser.js');
 
 describe('wasm any', function () {
 
   it('simple any', function (done) {
-    lib.createVCD().then(mod => {
-      lib.webVcdParser(mod).then(inst => {
+    createVCD().then(mod => {
+      webVcdParser(mod).then(inst => {
         const dump = [];
 
         inst.change.any((id, time, cmd, value, mask) => {
