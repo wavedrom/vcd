@@ -1,4 +1,4 @@
-name: Linux WASM
+name: Linux NAPI
 on: [push, pull_request]
 jobs:
   test:
@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [15, 16]
+        node-version: [12, 14]
     steps:
     - uses: actions/checkout@v1
     - name: Use Node.js ${{ matrix.node-version }}
@@ -14,4 +14,4 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm i
-    - run: npm run nyc_mocha_wasm
+    - run: npm run mocha_napi
