@@ -2,19 +2,19 @@
 'use strict';
 
 const fs = require('fs-extra');
-const cp = require('child_process');
+// const cp = require('child_process');
 const llparse = require('llparse');
 
-const gyp = cb => {
-  console.log('build');
-  const proc = cp.spawn('node-gyp', ['configure', 'build']);
-  proc.stderr.on('data', data => {
-    console.error(data.toString());
-  });
-  proc.on('close', (cb || (() => {
-    console.log('done');
-  })));
-};
+// const gyp = cb => {
+//   console.log('build');
+//   const proc = cp.spawn('node-gyp', ['configure', 'build']);
+//   proc.stderr.on('data', data => {
+//     console.error(data.toString());
+//   });
+//   proc.on('close', (cb || (() => {
+//     console.log('done');
+//   })));
+// };
 
 const objection = lut => arg => arg.split(/\s+/).reduce((res, key) => {
   if (lut[key] === undefined) {
@@ -43,7 +43,7 @@ const properties = {
   napi_env:     'ptr'
 };
 
-const generate = cb => {
+const generate = (/* cb */) => {
   // const llparseDot = require('llparse-dot');
 
   const prj = 'vcd_parser';
@@ -281,9 +281,9 @@ const generate = cb => {
   // const dot = new llparseDot.Dot();
   // fs.writeFileSync(prj + '.dot', dot.build(declaration));
 
-  cb();
+  // cb();
 };
 
-generate(gyp);
+generate(/* gyp */);
 
 /* eslint camelcase: 0 */
