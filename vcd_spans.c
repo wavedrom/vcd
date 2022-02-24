@@ -260,6 +260,16 @@ int onDigit(
   return 0;
 }
 
+int onRecover(
+  vcd_parser_t* state,
+  const unsigned char* p,
+  const unsigned char* endp,
+  int digit
+) {
+  state->digitCount = 0;
+  return 0;
+}
+
 int timeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
   int64_t time = strtoul((const char *)p, (char **)&endp, 10);
   if (state->time == INT64_MAX) {

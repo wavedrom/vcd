@@ -43,6 +43,9 @@ const properties = {
   napi_env:     'ptr'
 };
 
+const spaces = [' ', '\n', '\r', '\t'];
+const lineSpaces = [' ', '\t'];
+
 const generate = (cb) => {
   // const llparseDot = require('llparse-dot');
 
@@ -79,7 +82,7 @@ const generate = (cb) => {
     simulation,
     inSimulation,
     simulationTime,
-    simulationVector, simulationVectorEnd,
+    simulationVector, simulationVectorEnd, simulationVectorRecovery,
     simulationId
   } = `
     declaration
@@ -93,15 +96,13 @@ const generate = (cb) => {
     simulation
     inSimulation
     simulationTime
-    simulationVector simulationVectorEnd
+    simulationVector simulationVectorEnd simulationVectorRecovery
     simulationId
   `
     .trim().split(/\s+/)
     .reduce((res, n) => Object.assign(res, {[n]: p.node(n)}), {});
 
   const enddefinitions = p.node('inDeclarationEnd');
-
-  const spaces = [' ', '\n', '\r', '\t'];
 
   const cmd = objection({
     $comment: 1,
@@ -147,7 +148,22 @@ const generate = (cb) => {
     .otherwise(scopeTypeEnd);
 
   scopeTypeEnd
-    .select({begin: 1, fork: 2, function: 3, module: 4, task: 5},
+    .select(
+      {
+        module: 0,
+        task: 1,
+        function: 2,
+        begin: 3,
+        fork: 4,
+        // extra scopes from Verilator
+        generate: 5,
+        struct: 6,
+        union: 7,
+        class: 8,
+        interface: 9,
+        package: 10,
+        program: 11
+      },
       p.invoke(p.code.store('type'), scopeIdentifier))
     .otherwise(p.error(2, 'Expected scope type'));
 
@@ -258,15 +274,28 @@ const generate = (cb) => {
       p.invoke(
         // p.code.mulAdd('value', {base: 2, signed: false}),
         p.code.value('onDigit'),
-        {1: p.error(1, 'Content-Length overflow')},
+        {1: p.error(5, 'Content-Length overflow')},
         simulationVector
       )
     )
     .otherwise(simulationVectorEnd);
 
   simulationVectorEnd
-    .match(spaces, idSpan.start(simulationId))
-    .skipTo(simulationVectorEnd);
+    .match(lineSpaces, idSpan.start(simulationId))
+    .skipTo(simulationVectorRecovery);
+
+  simulationVectorRecovery
+    .select(
+      {
+        '\n': 1, '\r': 1
+      },
+      p.invoke(
+        p.code.value('onRecover'),
+        {1: p.error(6, 'recover')},
+        simulation
+      )
+    )
+    .skipTo(simulationVectorRecovery);
 
   simulationId
     .match(spaces, idSpan.end(simulation))

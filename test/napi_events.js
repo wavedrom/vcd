@@ -1,12 +1,12 @@
 'use strict';
 
 const expect = require('chai').expect;
-const lib = require('../lib/index.js');
+const parser = require('../lib/parser.js');
 
 describe('events', () => {
 
   it('$enddefinitions', done => {
-    const inst = lib.parser();
+    const inst = parser();
     inst.on('$enddefinitions', () => {
       expect(inst.info).to.deep.eq({
         status: 'simulation',

@@ -1,12 +1,12 @@
 'use strict';
 
 const expect = require('chai').expect;
-const lib = require('../lib/index.js');
+const parser = require('../lib/parser.js');
 
 describe('dump', () => {
 
   it('simple', done => {
-    const inst = lib.parser();
+    const inst = parser();
     const dump = [];
     ['"}G', '{u', 'u)'] // array of all signal ids
       .map(id =>
