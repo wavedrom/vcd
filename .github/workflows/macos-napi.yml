@@ -1,4 +1,4 @@
-name: MacOS
+name: MacOS NAPI
 on: [push, pull_request]
 jobs:
   test:
