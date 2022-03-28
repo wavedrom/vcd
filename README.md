@@ -63,8 +63,23 @@ myStream.pipe(inst);
 
 ## Test
 
+### Build / Test Napi version
+
 ```
 npm i
+npm run mocha_napi
+```
+
+### Build / Test Wasm version
+
+```
+make
+npm run mocha_wasm
+```
+
+### Test all
+
+```
 npm test
 ```
 
