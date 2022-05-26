@@ -1,7 +1,9 @@
 [![NPM version](https://img.shields.io/npm/v/vcd-stream.svg)](https://www.npmjs.org/package/vcd-stream)
-[![](https://github.com/wavedrom/vcd/workflows/Linux/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/linux.yml)
-[![](https://github.com/wavedrom/vcd/workflows/MacOS/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/macos.yml)
-[![](https://github.com/wavedrom/vcd/workflows/Windows/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/windows.yml)
+[![](https://github.com/wavedrom/vcd/workflows/linux-napi/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/linux-napi.yml)
+[![](https://github.com/wavedrom/vcd/workflows/linux-wasm/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/linux-wasm.yml)
+[![](https://github.com/wavedrom/vcd/workflows/macos-napi/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/macos-napi.yml)
+[![](https://github.com/wavedrom/vcd/workflows/macos-wasm/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/macos-wasm.yml)
+[![](https://github.com/wavedrom/vcd/workflows/windows-wasm/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/windows-wasm.yml)
 
 Value Change Dump ([VCD](https://en.wikipedia.org/wiki/Value_change_dump)) parser using [llparse](https://github.com/nodejs/llparse)
 
