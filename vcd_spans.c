@@ -25,7 +25,7 @@ typedef void* napi_env;
     }
 
 void strcopy(const unsigned char* p, const unsigned char* endp, unsigned char* dst) {
-  unsigned char* src;
+  const unsigned char* src;
   src = p;
   while (src < (endp - 1)) {
     *dst = *src;
@@ -35,40 +35,52 @@ void strcopy(const unsigned char* p, const unsigned char* endp, unsigned char* d
   *dst = 0;
 }
 
+void strconcat(const unsigned char* p, const unsigned char* endp, unsigned char* dst) {
+  // printf("<len:%d>", endp - p);
+  dst += strlen((char *)dst); // go to the end of string
+  while (p < endp) {
+    *dst = *p;
+    p++;
+    dst++;
+  }
+  *dst = 0;
+}
+
 // FIXME use a better structure to match strings
 int stringEq (
-  const unsigned char* gold, // search pattern
+  const unsigned char* i, // search pattern
   const unsigned char* p,
   const unsigned char* endp
 ) {
-  if (gold[0] == 0) {
+  if (*i == 0) {
     return 1;
   }
-  unsigned char* i;
-  unsigned char* j;
-  i = gold;
-  j = p;
+  const unsigned char* j;
   while (1) {
-    if (*i == ' ') { // end of search pattern
+    j = p;
+    // printf("(%s|%s)", (char *)i, (char *)j);
+    if (*i == 0) { // end of search pattern
       return 0;
     }
     while (*i == *j) { // follow matching trail
+      if (*i == 0 && *j == 0) { // match zeros
+        return 1;
+      }
       i++;
       j++;
     }
-    if ((*i == ' ') && (j == (endp - 1))) { // exact match
-      return 1;
-    }
-    while (*i != ' ') { // skip to the end of pattern word
+    while (*i != 0) { // skip to the end of pattern word
       i++;
     }
     i++;
-    j = p; // try another word
   }
 }
 
 int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+
+#ifndef VCDWASM
   napi_env env = state->napi_env;
+#endif
 
   if (state->command == 5) { // $upscope
     state->stackPointer -= 1;
@@ -100,6 +112,8 @@ int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
   }
 
   if (state->command == 8) { // $enddefinitions
+    *(char *)state->idStr = 0;
+    *(char *)state->timeStampStr = 0;
 #ifndef VCDWASM
     napi_value status, undefined, eventName, eventPayload, return_val;
     ASSERT(status, napi_create_string_latin1(env, "simulation", NAPI_AUTO_LENGTH, &status))
@@ -191,15 +205,27 @@ int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
 }
 
 int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
+  strconcat(p, endp, state->idStr);
+  // printf("<idSpan|%s>\n", (char *)state->idStr);
+  return 0;
+}
+
+int onId (vcd_parser_t* state, const unsigned char* _p, const unsigned char* _endp) {
 #ifndef VCDWASM
   napi_env env = state->napi_env;
 #endif
+  const unsigned char* p = (char *)state->idStr;
+  const unsigned int plen = strlen((char *)p) - 1;
+  *(char *)(p + plen) = 0; // null instead of space
+  const unsigned char* endp = p + plen - 1;
+  // printf("<onId|%s>\n", (char *)state->idStr);
 
   const int valueWords = (state->digitCount >> 6) + 1;
   uint64_t* value = state->value;
   uint64_t* mask = state->mask;
   if (stringEq((state->trigger), p, endp)) {
     const uint8_t command = state->command;
+    // printf("{id:'%s',cmd:%d}", (char *)p, command);
     if (command == 14) {
       value[0] = 0;
       mask[0] = 0;
@@ -211,17 +237,17 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
 #ifndef VCDWASM
     napi_value undefined, eventName, aTime, aCommand, aValue, aMask, return_val;
     ASSERT(undefined, napi_get_undefined(env, &undefined))
-    ASSERT(eventName, napi_create_string_latin1(env, (char*)p, (endp - p - 1), &eventName))
+    ASSERT(eventName, napi_create_string_latin1(env, (char*)p, NAPI_AUTO_LENGTH, &eventName))
     ASSERT(aTime, napi_create_int64(env, state->time, &aTime))
     ASSERT(aCommand, napi_create_int32(env, command, &aCommand))
     ASSERT(aValue, napi_create_bigint_words(env, 0, valueWords, value, &aValue))
     ASSERT(aMask, napi_create_bigint_words(env, 0, valueWords, mask, &aMask))
     napi_value* argv[] = {&eventName, &aTime, &aCommand, &aValue, &aMask};
     ASSERT(state->triee, napi_call_function(env, undefined, state->triee, 5, *argv, &return_val))
-
+    // printf("<id='%s'>", (char *)p);
 #else
-    strcopy(p, endp, state->tmpStr);
-    emit_triee(state->tmpStr, state->time, command, valueWords, value, mask);
+    // strcopy(p, endp, state->tmpStr);
+    emit_triee((char *)p, state->time, command, valueWords, value, mask);
 #endif
   }
   for (int i = 0; i < valueWords; i++) {
@@ -229,8 +255,11 @@ int idSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* end
     mask[i] = 0;
   }
   state->digitCount = 0;
+  *(char *)state->idStr = 0;
   return 0;
 }
+
+
 
 int onDigit(
   vcd_parser_t* state,
@@ -270,8 +299,17 @@ int onRecover(
   return 0;
 }
 
+
 int timeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  int64_t time = strtoul((const char *)p, (char **)&endp, 10);
+  strconcat(p, endp, state->timeStampStr);
+  // printf("<timeSpan|%s>\n", (char *)state->timeStampStr);
+  return 0;
+}
+
+int onTime (vcd_parser_t* state, const unsigned char* _p, const unsigned char* _endp) {
+  char *end;
+  const int64_t time = strtoul(state->timeStampStr, &end, 10);
+  // printf("<onTime|%lu>\n", time);
   if (state->time == INT64_MAX) {
 #ifndef VCDWASM
     napi_env env = state->napi_env;
@@ -283,5 +321,6 @@ int timeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* e
 #endif
   }
   state->time = time;
+  *(char *)state->timeStampStr = 0;
   return 0;
 }

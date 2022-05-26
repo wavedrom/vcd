@@ -123,9 +123,11 @@ METHOD(init) {
   ASSERT_FUNCTION(args[1], state->triee)
   ASSERT_OBJECT(args[2], state->info)
 
-  static char triggerString [4096] = "       ";
-  static char tmpStr [4096] = "       ";
-  static char tmpStr2 [4096] = "       ";
+  static char triggerString [4096] = {0};
+  static char tmpStr [4096] = {0};
+  static char tmpStr2 [4096] = {0};
+  static char timeStampStr [4096] = {0};
+  static char idStr [4096] = {0};
   static uint64_t valueBuf [4096] = {};
   static uint64_t maskBuf [4096] = {};
 
@@ -134,6 +136,8 @@ METHOD(init) {
   state->napi_env = env;
   state->tmpStr = tmpStr;
   state->tmpStr2 = tmpStr2;
+  state->timeStampStr = timeStampStr;
+  state->idStr = idStr;
   state->value = valueBuf;
   state->mask = maskBuf;
   state->time = INT64_MAX;

@@ -17,7 +17,9 @@ describe('basic', () => {
 
   it('fail: foo bar', done => {
     const inst = parser();
-    expect(inst.write(Buffer.from(' foo bar ???'))).to.eq(true);
+    expect(() => {
+      inst.write(Buffer.from(' foo bar ???'));
+    }).not.to.throw();
     expect(inst.info).to.deep.eq({
       stack: [{}],
       status: 'declaration',
@@ -26,11 +28,13 @@ describe('basic', () => {
     done();
   });
 
-  it('$comment', done => {
+  it('fail: $comment', done => {
     const inst = parser();
-    expect(inst.write(Buffer.from(
-      ' \n $comment some text $end $comment more text $end ???'
-    ))).to.eq(true);
+    expect(() => {
+      inst.write(Buffer.from(
+        ' \n $comment some text $end $comment more text $end ???'
+      ));
+    }).not.to.throw();
     expect(inst.info).to.deep.eq({
       comment: ' more text ',
       stack: [{}],

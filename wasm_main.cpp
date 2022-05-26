@@ -123,9 +123,11 @@ int init(
   state->lifee = 0;
   state->triee = 0;
 
-  static char triggerString [4096] = "       ";
-  static char tmpStr [4096] = "       ";
-  static char tmpStr2 [4096] = "       ";
+  static char triggerString [4096] = {0};
+  static char tmpStr [4096] = {0};
+  static char tmpStr2 [4096] = {0};
+  static char timeStampStr [4096] = {0};
+  static char idStr [4096] = {0};
   static uint64_t valueBuf [4096] = {};
   static uint64_t maskBuf [4096] = {};
 
@@ -134,10 +136,12 @@ int init(
   state->napi_env = 0;
   state->tmpStr = tmpStr;
   state->tmpStr2 = tmpStr2;
+  state->timeStampStr = timeStampStr;
+  state->idStr = idStr;
   state->value = valueBuf;
   state->mask = maskBuf;
-  state->digitCount = 0;
   state->time = INT64_MAX;
+  state->digitCount = 0;
 
   set_property_string("status", "declaration");
 
@@ -157,7 +161,8 @@ int32_t execute(
   externalJsMethodOne*  f1,
   externalJsSetProperty* sfn,
   externalJsGetProperty* gfn,
-  char* p
+  char* p,
+  const int plen
   ) {
 
   // cout << "execute got " << p << "\n";
@@ -167,7 +172,9 @@ int32_t execute(
   externalZero = f0;
   externalOne  = f1;
 
-  const size_t plen = strlen(p);
+  // const size_t plen = strlen(p);
+  // printf("<chunk len|%d>\n", plen);
+
 
   const int32_t error = vcd_parser_execute(state, p, p + plen);
 
@@ -175,9 +182,18 @@ int32_t execute(
 }
 
 int setTrigger(const int context, char* triggerString) {
-  state->trigger = malloc(strlen(triggerString));
-  strcpy((char*)state->trigger, triggerString);
-  // cout << "setTrigger() got " << triggerString << "\n";
+  int triggerStringLen = strlen((char *)triggerString) - 1;
+  // state->trigger = malloc(strlen(triggerString));
+  char* p = (char *)state->tmpStr;
+  for (int i = 0; i < triggerStringLen; i++) {
+    char c = *(triggerString + i);
+    if (c == 32) {
+      c = 0;
+    }
+    *(p + i) = c;
+  }
+  // strcpy((char*)state->trigger, triggerString);
+  // cout << "[" << triggerString << "|" << p << "\n";
   return 0;
 }
 

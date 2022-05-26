@@ -1,118 +1,87 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 const expect = require('chai').expect;
 const parser = require('../lib/parser.js');
+const chopper = require('../lib/chopper.js');
 
-describe('dump', () => {
+const expectaitions = [
+  { id: '"}G', time: 100n, cmd: 14, value: 0n, mask: 0n },
+  { id: '"}G', time: 200n, cmd: 15, value: 1n, mask: 0n },
+  { id: '{u', time: 200n, cmd: 30, value: 0xf0f0f0f0f0f0f0f0n, mask: 0xff00ff00ff00ff00n },
+  { id: '"}G', time: 300n, cmd: 14, value: 0n, mask: 0n },
+  { id: '{u', time: 300n, cmd: 30, value: 0xf000000000000000n, mask: 0n },
+  { id: 'u)', time: 300n, cmd: 30, value: 0n, mask: 0n },
+  { id: '{u', time: 301n, cmd: 30, value: 0x0f00000000000000n, mask: 0n },
+  { id: 'u)', time: 301n, cmd: 30, value: 1n, mask: 0n },
+  { id: '{u', time: 302n, cmd: 30, value: 0x00f0000000000000n, mask: 0n },
+  { id: 'u)', time: 302n, cmd: 30, value: 2n, mask: 0n },
+  { id: '{u', time: 303n, cmd: 30, value: 0x000f000000000000n, mask: 0n },
+  { id: 'u)', time: 303n, cmd: 30, value: 3n, mask: 0n },
+  { id: '{u', time: 304n, cmd: 30, value: 0x0000f00000000000n, mask: 0n },
+  { id: 'u)', time: 304n, cmd: 30, value: 4n, mask: 0n },
+  { id: '{u', time: 305n, cmd: 30, value: 0x00000f0000000000n, mask: 0n },
+  { id: 'u)', time: 305n, cmd: 30, value: 5n, mask: 0n },
+  { id: '{u', time: 306n, cmd: 30, value: 0x000000f000000000n, mask: 0n },
+  { id: 'u)', time: 306n, cmd: 30, value: 6n, mask: 0n },
+  { id: '{u', time: 307n, cmd: 30, value: 0x0000000f00000000n, mask: 0n },
+  { id: 'u)', time: 307n, cmd: 30, value: 7n, mask: 0n },
+  { id: '{u', time: 308n, cmd: 31, value: 0x00000000f0000000n, mask: 0n },
+  { id: 'u)', time: 308n, cmd: 30, value: 8n, mask: 0n },
+  { id: '{u', time: 309n, cmd: 30, value: 0x000000000f000000n, mask: 0n },
+  { id: 'u)', time: 309n, cmd: 30, value: 9n, mask: 0n },
+  { id: '{u', time: 310n, cmd: 30, value: 0x0000000000f00000n, mask: 0n },
+  { id: 'u)', time: 310n, cmd: 30, value: 10n, mask: 0n },
+  { id: '{u', time: 311n, cmd: 30, value: 0x00000000000f0000n, mask: 0n },
+  { id: 'u)', time: 311n, cmd: 30, value: 11n, mask: 0n },
+  { id: '{u', time: 312n, cmd: 30, value: 0x000000000000f000n, mask: 0n },
+  { id: 'u)', time: 312n, cmd: 30, value: 12n, mask: 0n },
+  { id: '{u', time: 313n, cmd: 30, value: 0x0000000000000f00n, mask: 0n },
+  { id: 'u)', time: 313n, cmd: 30, value: 13n, mask: 0n },
+  { id: '{u', time: 314n, cmd: 30, value: 0x00000000000000f0n, mask: 0n },
+  { id: 'u)', time: 314n, cmd: 30, value: 14n, mask: 0n },
+  { id: '{u', time: 315n, cmd: 30, value: 0x000000000000000fn, mask: 0n },
+  { id: 'u)', time: 315n, cmd: 30, value: 15n, mask: 0n },
+  { id: '"}G', time: 316n, cmd: 15, value: 1n, mask: 0n }
+];
 
-  it('simple', done => {
-    const inst = parser();
-    const dump = [];
-    ['"}G', '{u', 'u)'] // array of all signal ids
-      .map(id =>
-        inst.change.on(id, (time, cmd, value, mask) => {
-          dump.push({
-            id,
-            time,
-            cmd,
-            value,
-            mask
-          });
-        })
-      );
+describe('napi dump', function () {
+  it('simple napi', done => {
+    fs.readFile(path.join(__dirname, 'dump.vcd'), function (err, src) {
+      if (err) {
+        throw new Error(err);
+      }
+      const inst = parser();
+      const dump = [];
+      ['"}G', '{u', 'u)'] // array of all signal ids
+        .map(id =>
+          inst.change.on(id, (time, cmd, value, mask) => {
+            const row = {
+              id,
+              time: BigInt(time),
+              cmd,
+              value,
+              mask
+            };
+            dump.push(row);
+            // console.log(row);
+          })
+        );
 
-    inst.on('finish', () => {
-      expect(inst.getTime()).to.eq(316n);
-      expect(dump).to.deep.eq([
-        { id: '"}G', time: 100, cmd: 14, value: 0n, mask: 0n },
-        { id: '"}G', time: 200, cmd: 15, value: 1n, mask: 0n },
-        { id: '{u', time: 200, cmd: 30, value: 0xf0f0f0f0f0f0f0f0n, mask: 0xff00ff00ff00ff00n },
-        { id: '"}G', time: 300, cmd: 14, value: 0n, mask: 0n },
-        { id: '{u', time: 300, cmd: 30, value: 0xf000000000000000n, mask: 0n },
-        { id: '{u', time: 301, cmd: 30, value: 0x0f00000000000000n, mask: 0n },
-        { id: '{u', time: 302, cmd: 30, value: 0x00f0000000000000n, mask: 0n },
-        { id: '{u', time: 303, cmd: 30, value: 0x000f000000000000n, mask: 0n },
-        { id: '{u', time: 304, cmd: 30, value: 0x0000f00000000000n, mask: 0n },
-        { id: '{u', time: 305, cmd: 30, value: 0x00000f0000000000n, mask: 0n },
-        { id: '{u', time: 306, cmd: 30, value: 0x000000f000000000n, mask: 0n },
-        { id: '{u', time: 307, cmd: 30, value: 0x0000000f00000000n, mask: 0n },
-        { id: '{u', time: 308, cmd: 31, value: 0x00000000f0000000n, mask: 0n },
-        { id: '{u', time: 309, cmd: 30, value: 0x000000000f000000n, mask: 0n },
-        { id: '{u', time: 310, cmd: 30, value: 0x0000000000f00000n, mask: 0n },
-        { id: '{u', time: 311, cmd: 30, value: 0x00000000000f0000n, mask: 0n },
-        { id: '{u', time: 312, cmd: 30, value: 0x000000000000f000n, mask: 0n },
-        { id: '{u', time: 313, cmd: 30, value: 0x0000000000000f00n, mask: 0n },
-        { id: '{u', time: 314, cmd: 30, value: 0x00000000000000f0n, mask: 0n },
-        { id: '{u', time: 315, cmd: 30, value: 0x000000000000000fn, mask: 0n },
-        { id: '"}G', time: 316, cmd: 15, value: 1n, mask: 0n }
-      ]);
-      // console.log(dump);
-      done();
+      inst.on('finish', () => {
+        expect(inst.getTime()).to.eq(316n);
+        expect(dump).to.deep.eq(expectaitions);
+        done();
+      });
+
+      for (const chunk of chopper(src, 100)) {
+        // console.log('\u001b[31m[\u001b[0m' + chunk.toString() + '\u001b[31m]\u001b[0m');
+        inst.write(chunk);
+      }
+      inst.end();
     });
-
-    inst.write(`
-$version Generated by VerilatedVcd $end
-$date Wed Sep 18 22:59:07 2019
- $end
-$timescale   1ns $end
-
-  $scope   module   top    $end
-    $var wire  1 "}G clock $end
-    $scope module leaf $end
-      $var wire 64 {u counter [63:0] $end
-    $upscope $end
-    $scope module fruit $end
-      $var wire 4 u) point [3:0] $end
-    $upscope $end
-  $upscope $end
-
-  $enddefinitions $end
-#100
-0"}G
-#200
-1"}G
-bzzzzxxxx11110000ZZZZXXXX11110000zzzzxxx`);
-
-    // break in the middle of the number scan
-
-    inst.write(`x11110000zzzzxxxx11110000 {u
-#300
-0"}G
-b1111000000000000000000000000000000000000000000000000000000000000 {u
-#301
-b0000111100000000000000000000000000000000000000000000000000000000 {u
-#302
-b0000000011110000000000000000000000000000000000000000000000000000 {u
-#303
-b0000000000001111000000000000000000000000000000000000000000000000 {u
-#304
-b0000000000000000111100000000000000000000000000000000000000000000 {u
-#305
-b0000000000000000000011110000000000000000000000000000000000000000 {u
-#306
-b0000000000000000000000001111000000000000000000000000000000000000 {u
-#307
-b0000000000000000000000000000111100000000000000000000000000000000 {u
-#308
-B0000000000000000000000000000000011110000000000000000000000000000 {u
-#309
-b0000000000000000000000000000000000001111000000000000000000000000 {u
-#310
-b0000000000000000000000000000000000000000111100000000000000000000 {u
-#311
-b0000000000000000000000000000000000000000000011110000000000000000 {u
-#312
-b0000000000000000000000000000000000000000000000001111000000000000 {u
-#313
-b0000000000000000000000000000000000000000000000000000111100000000 {u
-#314
-b0000000000000000000000000000000000000000000000000000000011110000 {u
-#315
-b0000000000000000000000000000000000000000000000000000000000001111 {u
-#316
-1"}G
-`);
-    inst.end();
   });
 });
 

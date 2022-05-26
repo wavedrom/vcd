@@ -37,6 +37,8 @@ const properties = {
   mask:         'ptr', // mask (x, z) of the signal on change event
   digitCount:   'i32',
   tmpStr:       'ptr',
+  timeStampStr: 'ptr',
+  idStr:        'ptr',
   tmpStr2:      'ptr',
   stackPointer: 'i32',
   id:           'ptr',
@@ -255,7 +257,7 @@ const generate = (cb) => {
     .skipTo(inSimulation);
 
   simulationTime
-    .match(spaces, timeSpan.end(simulation))
+    .match(spaces, timeSpan.end(p.invoke(p.code.span('onTime'), simulation)))
     .skipTo(simulationTime);
 
   simulationVector
@@ -298,7 +300,7 @@ const generate = (cb) => {
     .skipTo(simulationVectorRecovery);
 
   simulationId
-    .match(spaces, idSpan.end(simulation))
+    .match(spaces, idSpan.end(p.invoke(p.code.span('onId'), simulation)))
     .skipTo(simulationId);
 
   const artifacts = p.build(declaration);
