@@ -25,20 +25,22 @@ EXPORT_STRING = \
 
 # warning and error flags
 CLANG_WARN_FLAGS = \
--flto \
 -fno-exceptions \
--Wl,--lto-O3 \
--Wall -Wextra \
+-Wall \
+-Wextra \
 -Wno-ignored-qualifiers \
 -Wundef \
 -Werror=return-type \
 -Wshadow \
+
 # -Wconversion
+# -flto \
+# -Wl,--lto-O3 \
 
 CLANG_OTHER_FLAGS = \
 -DVCDWASM \
 
-CLANG_O_FLAG = '-Oz'
+CLANG_O_FLAG = '-Os'
 
 ifdef NOOPT
   CLANG_O_FLAG = ' '
