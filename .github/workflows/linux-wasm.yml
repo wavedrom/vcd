@@ -1,12 +1,12 @@
-name: Windows
+name: Linux WASM
 on: [push, pull_request]
 jobs:
   test:
-    name: Node ${{ matrix.node-version }}
-    runs-on: windows-latest
+    name: Linux ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16, 18]
+        node-version: [15, 16, 17]
     steps:
     - uses: actions/checkout@v1
     - name: Use Node.js ${{ matrix.node-version }}
@@ -14,4 +14,4 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm i
-    - run: npm run nyc_mocha_wasm
+    - run: npm mocha_wasm
