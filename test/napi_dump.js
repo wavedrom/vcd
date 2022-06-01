@@ -9,7 +9,7 @@ const chopper = require('../lib/chopper.js');
 
 const expectaitions = [
   { id: '"}G', time: 100n, cmd: 14, value: 0n, mask: 0n },
-  { id: '"}G', time: 200n, cmd: 15, value: 1n, mask: 0n },
+  { id: '"}G', time: 200n, cmd: 15, value: 0n, mask: 0n },
   { id: '{u', time: 200n, cmd: 30, value: 0xf0f0f0f0f0f0f0f0n, mask: 0xff00ff00ff00ff00n },
   { id: '"}G', time: 300n, cmd: 14, value: 0n, mask: 0n },
   { id: '{u', time: 300n, cmd: 30, value: 0xf000000000000000n, mask: 0n },
@@ -44,7 +44,7 @@ const expectaitions = [
   { id: 'u)', time: 314n, cmd: 30, value: 14n, mask: 0n },
   { id: '{u', time: 315n, cmd: 30, value: 0x000000000000000fn, mask: 0n },
   { id: 'u)', time: 315n, cmd: 30, value: 15n, mask: 0n },
-  { id: '"}G', time: 316n, cmd: 15, value: 1n, mask: 0n }
+  { id: '"}G', time: 316n, cmd: 15, value: 0n, mask: 0n }
 ];
 
 describe('napi dump', function () {

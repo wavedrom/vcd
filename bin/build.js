@@ -36,6 +36,7 @@ const properties = {
   value:        'ptr', // value of the signal on change event
   mask:         'ptr', // mask (x, z) of the signal on change event
   digitCount:   'i32',
+  maskCount:    'i32',
   tmpStr:       'ptr',
   timeStampStr: 'ptr',
   idStr:        'ptr',

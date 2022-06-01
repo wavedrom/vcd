@@ -20,6 +20,7 @@ typedef void externalJsMethodOne (
   const int command,
   const int valueWords,
   const int aValue,
+  const int maskWords,
   const int aMask
 );
 
@@ -71,6 +72,7 @@ void emit_triee(
   const int command,
   const int valueWords,
   uint64_t* aValue,
+  const int maskWords,
   uint64_t* aMask
 ) {
 
@@ -91,6 +93,7 @@ void emit_triee(
     command,
     valueWords,
     (int)aValue,
+    maskWords,
     (int)aMask
     );
 }
@@ -142,6 +145,7 @@ int init(
   state->mask = maskBuf;
   state->time = INT64_MAX;
   state->digitCount = 0;
+  state->maskCount = 0;
 
   set_property_string("status", "declaration");
 

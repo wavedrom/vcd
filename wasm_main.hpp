@@ -14,5 +14,6 @@ void emit_triee(
   const int command,
   const int valueWords,
   uint64_t* aValue,
+  const int maskWords,
   uint64_t* aMask
 );

@@ -142,6 +142,7 @@ METHOD(init) {
   state->mask = maskBuf;
   state->time = INT64_MAX;
   state->digitCount = 0;
+  state->maskCount = 0;
 
   napi_value status;
   ASSERT(status, napi_create_string_latin1(env, "declaration", NAPI_AUTO_LENGTH, &status))
