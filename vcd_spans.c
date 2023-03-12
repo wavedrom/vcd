@@ -77,41 +77,53 @@ int stringEq (
 }
 
 int commandSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-
+  const uint8_t command = state->command;
 #ifndef VCDWASM
   napi_env env = state->napi_env;
-#endif
 
-  if (state->command == 5) { // $upscope
-    state->stackPointer -= 1;
-    return 0;
-  }
+  // if (command == 5) { // $upscope
+  //   state->stackPointer -= 1;
+  //   return 0;
+  // }
 
   if (
-    (state->command == 1) || // $comment
-    (state->command == 2) || // $date
-    (state->command == 4) || // $timescale
-    (state->command == 7)    // $version
+    (command == 1) || // $comment
+    (command == 2) || // $date
+    (command == 3) || // $scope
+    (command == 4) || // $timescale
+    (command == 5) || // $upscope
+    (command == 6) || // $var
+    (command == 7)    // $version
   ) {
     char* key;
-    switch(state->command) {
+    switch(command) {
     case 1: key = "comment"; break;
     case 2: key = "date"; break;
     case 4: key = "timescale"; break;
+    // case 6: key = "var"; break;
     case 7: key = "version"; break;
     }
-#ifndef VCDWASM
+
     napi_value val;
     ASSERT(val, napi_create_string_latin1(env, (char*)p, (endp - p - 4), &val))
     ASSERT(state->info, napi_set_named_property(env, state->info, key, val))
-#else
-    strcopy(p, endp - 3, state->tmpStr);
-    set_property_string(key, state->tmpStr);
-#endif
     return 0;
   }
+#else
+  if ((command > 0) && (command < 8)) {
+    const int len = endp - p;
+    int tailLen = 3;
+    if (len < 4) {
+      tailLen = len;
+    }
+    strcopy(p, endp - tailLen, state->tmpStr);
+    // set_property_string(key, state->tmpStr);
+    on_command(state->tmpStr, command);
+    return 0;
+  }
+#endif
 
-  if (state->command == 8) { // $enddefinitions
+  if (command == 8) { // $enddefinitions
     *(char *)state->idStr = 0;
     *(char *)state->timeStampStr = 0;
 #ifndef VCDWASM
@@ -167,7 +179,13 @@ int scopeIdentifierSpan(vcd_parser_t* state, const unsigned char* p, const unsig
 }
 
 int varSizeSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char* endp) {
-  state->size = strtol((const char *)p, (char **)&endp, 10);
+  const int32_t size = strtol((const char *)p, (char **)&endp, 10);
+  state->size = size;
+#ifndef VCDWASM
+#else
+  set_property_int("varType", state->type);
+  set_property_int("varSize", size);
+#endif
   return 0;
 }
 
@@ -199,7 +217,7 @@ int varNameSpan(vcd_parser_t* state, const unsigned char* p, const unsigned char
   // set
   //  info.stack[sp].`tmpStr` = info.varId
   snprintf(state->tmpStr2, 4096, "stack.%d.%s", state->stackPointer, state->tmpStr);
-  set_path_to_path(state->tmpStr2, "varId");
+  set_path_to_path(state->tmpStr2, "varType,varSize,varId");
 #endif
   return 0;
 }

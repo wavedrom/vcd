@@ -58,6 +58,10 @@ void new_object_path(const char* name) {
   bound_set_property(name, strlen(name), 4, 0, 0);
 }
 
+void on_command(const char* body, const int command) {
+  bound_set_property(body, strlen(body), 5, command, 0);
+}
+
 int get_property_int(const char* name) {
   return bound_get_property(name, strlen(name));
 }

@@ -58,13 +58,12 @@ const generate = (cb) => {
   Object.keys(properties).map(key => p.property(properties[key], key));
 
   const {
-    scopeIdentifierSpan,
+    // scopeIdentifierSpan,
     varSizeSpan, varIdSpan, varNameSpan,
     idSpan,
     commandSpan,
     timeSpan
   } = `
-    scopeIdentifierSpan
     varSizeSpan varIdSpan varNameSpan
     idSpan
     commandSpan
@@ -73,10 +72,12 @@ const generate = (cb) => {
     .trim().split(/\s+/)
     .reduce((res, n) => Object.assign(res, {[n]: p.span(p.code.span(n))}), {});
 
+  // scopeIdentifierSpan
+
   const {
     declaration,
-    scopeType, scopeTypeEnd,
-    scopeIdentifier, scopeIdentifierEnd,
+    // scopeType, scopeTypeEnd,
+    // scopeIdentifier, scopeIdentifierEnd,
     varType, varTypeEnd,
     varSize, varSizeEnd,
     varId, varIdEnd,
@@ -89,8 +90,6 @@ const generate = (cb) => {
     simulationId
   } = `
     declaration
-    scopeType scopeTypeEnd
-    scopeIdentifier scopeIdentifierEnd
     varType varTypeEnd
     varSize varSizeEnd
     varId varIdEnd
@@ -104,6 +103,9 @@ const generate = (cb) => {
   `
     .trim().split(/\s+/)
     .reduce((res, n) => Object.assign(res, {[n]: p.node(n)}), {});
+
+  // scopeType scopeTypeEnd
+  // scopeIdentifier scopeIdentifierEnd
 
   const enddefinitions = p.node('inDeclarationEnd');
 
@@ -134,56 +136,50 @@ const generate = (cb) => {
 
   declaration
     .match(spaces, declaration)
-    .select(cmd('$scope'),
-      p.invoke(p.code.store('command'), commandSpan.start(scopeType)))
-    .select(cmd('$var'),
-      p.invoke(p.code.store('command'), commandSpan.start(varType)))
-    .select(cmd('$comment $date $timescale $upscope $version'),
+    // .select(cmd('$scope'),
+    //   p.invoke(p.code.store('command'), commandSpan.start(scopeType)))
+    // .select(cmd('$var'),
+    //   p.invoke(p.code.store('command'), commandSpan.start(varType)))
+    .select(cmd('$scope $var $upscope $comment $date $timescale $version'),
       p.invoke(p.code.store('command'), commandSpan.start(inDeclaration)))
     .select(cmd('$enddefinitions'),
       p.invoke(p.code.store('command'), commandSpan.start(enddefinitions)))
     .otherwise(p.error(1, 'Expected declaration command'));
 
-  // $scope
+  // $scope module clkdiv2n_tb $end
+  //        ^^^^^^
 
-  scopeType
-    .match(spaces, scopeType)
-    .otherwise(scopeTypeEnd);
+  // scopeType.match(spaces, scopeType).otherwise(scopeTypeEnd);
+  // scopeTypeEnd
+  //   .select(
+  //     {
+  //       module: 0,
+  //       task: 1,
+  //       function: 2,
+  //       begin: 3,
+  //       fork: 4,
+  //       // extra scopes from Verilator
+  //       generate: 5,
+  //       struct: 6,
+  //       union: 7,
+  //       class: 8,
+  //       interface: 9,
+  //       package: 10,
+  //       program: 11
+  //     },
+  //     p.invoke(p.code.store('type'), scopeIdentifier))
+  //   .otherwise(p.error(2, 'Expected scope type'));
 
-  scopeTypeEnd
-    .select(
-      {
-        module: 0,
-        task: 1,
-        function: 2,
-        begin: 3,
-        fork: 4,
-        // extra scopes from Verilator
-        generate: 5,
-        struct: 6,
-        union: 7,
-        class: 8,
-        interface: 9,
-        package: 10,
-        program: 11
-      },
-      p.invoke(p.code.store('type'), scopeIdentifier))
-    .otherwise(p.error(2, 'Expected scope type'));
+  // $scope module clkdiv2n_tb $end
+  //               ^^^^^^^^^^^
 
-  scopeIdentifier
-    .match(spaces, scopeIdentifier)
-    .otherwise(scopeIdentifierSpan.start(scopeIdentifierEnd));
+  // scopeIdentifier.match(spaces, scopeIdentifier).otherwise(scopeIdentifierSpan.start(scopeIdentifierEnd));
+  // scopeIdentifierEnd.match(spaces, scopeIdentifierSpan.end(inDeclaration)).skipTo(scopeIdentifierEnd);
 
-  scopeIdentifierEnd
-    .match(spaces, scopeIdentifierSpan.end(inDeclaration))
-    .skipTo(scopeIdentifierEnd);
+  // $var reg 3 ( r_reg [2:0] $end
+  //      ^^^
 
-  // $var
-
-  varType
-    .match(spaces, varType)
-    .otherwise(varTypeEnd);
-
+  varType.match(spaces, varType).otherwise(varTypeEnd);
   varTypeEnd
     .select({
       event: 1,
@@ -207,29 +203,23 @@ const generate = (cb) => {
     }, p.invoke(p.code.store('type'), varSize))
     .otherwise(p.error(3, 'Expected var type'));
 
-  varSize
-    .match(spaces, varSize)
-    .otherwise(varSizeSpan.start(varSizeEnd));
+  // $var reg 3 ( r_reg [2:0] $end
+  //          ^
 
-  varSizeEnd
-    .match(spaces, varSizeSpan.end(varId))
-    .skipTo(varSizeEnd);
+  varSize.match(spaces, varSize).otherwise(varSizeSpan.start(varSizeEnd));
+  varSizeEnd.match(spaces, varSizeSpan.end(varId)).skipTo(varSizeEnd);
 
-  varId
-    .match(spaces, varId)
-    .otherwise(varIdSpan.start(varIdEnd));
+  // $var reg 3 ( r_reg [2:0] $end
+  //            ^
 
-  varIdEnd
-    .match(spaces, varIdSpan.end(varName))
-    .skipTo(varIdEnd);
+  varId.match(spaces, varId).otherwise(varIdSpan.start(varIdEnd));
+  varIdEnd.match(spaces, varIdSpan.end(varName)).skipTo(varIdEnd);
 
-  varName
-    .match(spaces, varName)
-    .otherwise(varNameSpan.start(varNameEnd));
+  // $var reg 3 ( r_reg [2:0] $end
+  //              ^^^^^
 
-  varNameEnd
-    .match(spaces, varNameSpan.end(inDeclaration))
-    .skipTo(varNameEnd);
+  varName.match(spaces, varName).otherwise(varNameSpan.start(varNameEnd));
+  varNameEnd.match('$end', commandSpan.end(varNameSpan.end(declaration))).skipTo(varNameEnd);
 
   // $end
 
