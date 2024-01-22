@@ -1,6 +1,6 @@
 {
   "name": "vcd-stream",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Value Change Dump (VCD) parser",
   "main": "lib/index.js",
   "scripts": {
