@@ -45,26 +45,20 @@
     "llparse": "^7.1.1"
   },
   "devDependencies": {
-    "@drom/eslint-config": "^0.10.0",
+    "@drom/eslint-config": "^0.12.0",
     "browserify": "^17.0.0",
-    "chai": "^4.3.6",
+    "chai": "^4.4.1",
     "eslint": "^8.13.0",
-    "fs-extra": "^10.1.0",
+    "fs-extra": "^11.2.0",
     "http-server": "^14.1.0",
     "llparse-dot": "^1.0.1",
     "mocha": "^9.2.1",
-    "node-gyp": "^9.0.0",
+    "node-gyp": "^10.0.0",
     "nyc": "^15.1.0",
-    "terser": "^5.11.0",
+    "terser": "^5.27.0",
     "watchify": "^4.0.0"
   },
   "eslintConfig": {
-    "extends": "@drom/eslint-config/eslint4/node8",
-    "env": {
-      "es2020": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2020
-    }
+    "extends": "@drom/eslint-config/eslint8/node12"
   }
 }
