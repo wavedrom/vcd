@@ -25,10 +25,10 @@ const objection = lut => arg => arg.split(/\s+/).reduce((res, key) => {
 }, {});
 
 const properties = {
-  command:      'i8',
-  type:         'i8',
+  definitions:  'ptr',
+  output:       'ptr',
+  id_sum:       'i32',
   size:         'i32',
-  time:         'i64', // current simulation time
   trigger:      'ptr',
   triee:        'ptr', // trigger event emitter
   lifee:        'ptr', // life cycle event emmiter
@@ -43,13 +43,16 @@ const properties = {
   tmpStr2:      'ptr',
   stackPointer: 'i32',
   id:           'ptr',
-  napi_env:     'ptr'
+  napi_env:     'ptr',
+  time:         'i64', // current simulation time
+  command:      'i8',
+  type:         'i8'
 };
 
 const spaces = [' ', '\n', '\r', '\t'];
 const lineSpaces = [' ', '\t'];
 
-const generate = (cb) => {
+const generate = (/* cb */) => {
   // const llparseDot = require('llparse-dot');
 
   const prj = 'vcd_parser';
@@ -303,7 +306,7 @@ const generate = (cb) => {
   // const dot = new llparseDot.Dot();
   // fs.writeFileSync(prj + '.dot', dot.build(declaration));
 
-  cb();
+  // cb();
 };
 
 generate(gyp);
