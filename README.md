@@ -1,3 +1,5 @@
+Moved to https://github.com/wavedrom/vcdrom
+
 [![Linux NAPI](https://github.com/wavedrom/vcd/actions/workflows/linux-napi.yml/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/linux-napi.yml)[![Linux WASM](https://github.com/wavedrom/vcd/actions/workflows/linux-wasm.yml/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/linux-wasm.yml)[![MacOS NAPI](https://github.com/wavedrom/vcd/actions/workflows/macos-napi.yml/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/macos-napi.yml)[![MacOS WASM](https://github.com/wavedrom/vcd/actions/workflows/macos-wasm.yml/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/macos-wasm.yml)[![Windows WASM](https://github.com/wavedrom/vcd/actions/workflows/windows-wasm.yml/badge.svg)](https://github.com/wavedrom/vcd/actions/workflows/windows-wasm.yml)
 [![NPM version](https://img.shields.io/npm/v/vcd-stream.svg)](https://www.npmjs.org/package/vcd-stream)
 
